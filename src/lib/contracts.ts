@@ -1,17 +1,16 @@
 'use server';
 
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
-import { initializeFirebase } from '@/firebase';
+import { getFirestoreAdmin } from '@/firebase/server-init';
 import type { Contract } from './types';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { errorEmitter } from '@/firebase/error-emitter';
 
 export async function getContracts(userId: string): Promise<Contract[]> {
   if (!userId) {
     return [];
   }
   
-  const { firestore } = initializeFirebase();
+  const { firestore } = getFirestoreAdmin();
   const contractsCol = collection(firestore, 'users', userId, 'contracts');
   const q = query(contractsCol, orderBy('expirationDate', 'asc'));
 

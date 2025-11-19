@@ -5,8 +5,7 @@ import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { collection, Timestamp } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { getFirestore } from 'firebase/firestore';
-import { initializeFirebase } from '@/firebase';
+import { getFirestoreAdmin } from '@/firebase/server-init';
 
 const FormSchema = z
   .object({
@@ -53,7 +52,7 @@ export async function addContract(prevState: State, formData: FormData): Promise
   }
 
   const { documentName, partiesInvolved, effectiveDate, expirationDate, terms, userId } = validatedFields.data;
-  const { firestore } = initializeFirebase();
+  const { firestore } = getFirestoreAdmin();
 
   try {
     const summaryResult = await summarizeContract({ contractText: terms });

@@ -3,7 +3,7 @@
 import { AppIcon } from '@/components/app/app-icon';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { FileText, LogOut, PanelLeft } from 'lucide-react';
+import { FileText, LogOut, PanelLeft, BarChart2, ClipboardList } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/firebase';
 import { signOut } from 'firebase/auth';
@@ -31,13 +31,29 @@ export function AppSidebar() {
           <span className="font-semibold text-lg">Gudang Kontrak</span>
         </div>
         <nav className="flex-1 p-4 flex flex-col justify-between">
-          <Link
-            href="/"
-            className="flex items-center gap-3 rounded-lg bg-secondary text-primary px-3 py-2 transition-all hover:text-primary"
-          >
-            <FileText className="h-4 w-4" />
-            Kontrak
-          </Link>
+          <div className="grid gap-1">
+            <Link
+              href="/"
+              className="flex items-center gap-3 rounded-lg bg-secondary text-primary px-3 py-2 transition-all hover:text-primary"
+            >
+              <FileText className="h-4 w-4" />
+              Kontrak
+            </Link>
+            <Link
+              href="/laporan"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            >
+              <ClipboardList className="h-4 w-4" />
+              Laporan
+            </Link>
+            <Link
+              href="/statistik"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            >
+              <BarChart2 className="h-4 w-4" />
+              Statistik
+            </Link>
+          </div>
           <Button variant="ghost" onClick={handleLogout} className="justify-start">
             <LogOut className="mr-3 h-4 w-4" />
             Keluar
@@ -64,6 +80,20 @@ export function AppSidebar() {
               >
                 <FileText className="h-5 w-5" />
                 Kontrak
+              </Link>
+              <Link
+                href="/laporan"
+                className="flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-primary"
+              >
+                <ClipboardList className="h-5 w-5" />
+                Laporan
+              </Link>
+              <Link
+                href="/statistik"
+                className="flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-primary"
+              >
+                <BarChart2 className="h-5 w-5" />
+                Statistik
               </Link>
             </nav>
             <div className="mt-auto p-4">

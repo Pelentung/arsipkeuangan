@@ -3,7 +3,6 @@
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { getFirestoreAdmin } from '@/firebase/server-init';
 import type { Contract } from './types';
-import { FirestorePermissionError } from '@/firebase/errors';
 
 export async function getContracts(userId: string): Promise<Contract[]> {
   if (!userId) {
@@ -32,12 +31,9 @@ export async function getContracts(userId: string): Promise<Contract[]> {
     });
     return contractList;
   } catch (error) {
-    const permissionError = new FirestorePermissionError({
-        path: contractsCol.path,
-        operation: 'list',
-    });
-    // We don't use the global error emitter on the server
-    console.error(permissionError);
+    // Log a server-appropriate error.
+    // We cannot use the client-side FirestorePermissionError here as this is a server module.
+    console.error(`Error fetching contracts for user ${userId}:`, error);
     // Return empty array on error to prevent app crash on render
     return [];
   }

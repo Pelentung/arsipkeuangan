@@ -1,7 +1,6 @@
 'use server';
 
-import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import { collection, Timestamp, runTransaction, doc } from 'firebase/firestore';
+import { collection, Timestamp, runTransaction, doc, addDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { getFirestoreAdmin } from '@/firebase/server-init';
@@ -103,9 +102,15 @@ export async function addContract(prevState: ContractState, formData: FormData):
 
   const contractsColRef = collection(firestore, 'users', userId, 'contracts');
   
-  // Call the non-blocking function without await and without a try/catch block.
-  // Error handling (specifically for permissions) is handled within addDocumentNonBlocking.
-  addDocumentNonBlocking(contractsColRef, newContract);
+  try {
+    await addDoc(contractsColRef, newContract);
+  } catch (error) {
+    console.error("Database Error:", error);
+    return {
+      errors: { server: ['Gagal menyimpan kontrak ke database.'] },
+      message: 'Gagal menambahkan kontrak akibat kesalahan database.',
+    };
+  }
 
   revalidatePath('/');
   return { message: 'Berhasil menambahkan kontrak.' };

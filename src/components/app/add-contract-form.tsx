@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { addContract, type State } from '@/app/actions';
 import { useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -25,10 +26,7 @@ export function AddContractForm({ onSuccess }: { onSuccess: () => void }) {
   const { user } = useUser();
   const initialState: State = { message: null, errors: {} };
   
-  // We need to bind the userId to the form action
-  const addContractWithUserId = addContract.bind(null);
-
-  const [state, dispatch] = useFormState(addContractWithUserId, initialState);
+  const [state, dispatch] = useActionState(addContract, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
 

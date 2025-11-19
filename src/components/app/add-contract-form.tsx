@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from 'lucide-react';
 import { useUser } from '@/firebase';
+import { useRouter } from 'next/navigation';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -22,8 +23,9 @@ function SubmitButton() {
   );
 }
 
-export function AddContractForm({ onSuccess }: { onSuccess: () => void }) {
+export function AddContractForm() {
   const { user } = useUser();
+  const router = useRouter();
   const initialState: State = { message: null, errors: {} };
   
   const [state, dispatch] = useActionState(addContract, initialState);
@@ -44,10 +46,10 @@ export function AddContractForm({ onSuccess }: { onSuccess: () => void }) {
           description: state.message,
         });
         formRef.current?.reset();
-        onSuccess();
+        router.push('/');
       }
     }
-  }, [state, toast, onSuccess]);
+  }, [state, toast, router]);
 
   return (
     <form ref={formRef} action={dispatch} className="grid gap-4 py-4">

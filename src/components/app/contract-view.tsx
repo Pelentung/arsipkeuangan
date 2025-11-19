@@ -3,11 +3,11 @@
 import type { Contract } from '@/lib/types';
 import { useMemo, useState } from 'react';
 import { Input } from '@/components/ui/input';
-import { AddContractDialog } from '@/components/app/add-contract-dialog';
 import { ContractCard } from '@/components/app/contract-card';
 import { Skeleton } from '../ui/skeleton';
 import { Search } from 'lucide-react';
 import { useUser } from '@/firebase';
+import Link from 'next/link';
 
 interface ContractViewProps {
   initialContracts: Contract[];
@@ -58,9 +58,9 @@ export function ContractView({ initialContracts }: ContractViewProps) {
           <h3 className="text-2xl font-bold tracking-tight">Tidak ada kontrak yang ditemukan</h3>
           <p className="text-sm text-muted-foreground">
             {searchTerm ? 'Coba kata kunci pencarian lain atau ' : 'Mulai dengan '}
-            <AddContractDialog>
+            <Link href="/tambah-kontrak">
                 <span className="text-primary hover:underline cursor-pointer">menambahkan kontrak baru</span>
-            </AddContractDialog>
+            </Link>
             .
           </p>
         </div>

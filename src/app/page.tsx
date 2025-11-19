@@ -8,10 +8,11 @@ import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import type { Contract } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
+import { FileText, Clock, AlertTriangle, CheckCircle, PlusCircle } from 'lucide-react';
 import { ContractStatusChart } from '@/components/app/contract-status-chart';
-import { AddContractDialog } from '@/components/app/add-contract-dialog';
 import { differenceInDays, isPast } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 function Dashboard({ contracts }: { contracts: Contract[] }) {
   const summary = useMemo(() => {
@@ -63,7 +64,12 @@ function Dashboard({ contracts }: { contracts: Contract[] }) {
                 Selamat datang! Berikut adalah ringkasan data kontrak Anda.
             </p>
         </div>
-        <AddContractDialog />
+        <Link href="/tambah-kontrak" passHref>
+            <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Tambah Kontrak
+            </Button>
+        </Link>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">

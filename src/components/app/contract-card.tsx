@@ -10,7 +10,7 @@ interface ContractCardProps {
 }
 
 export function ContractCard({ contract }: ContractCardProps) {
-  const endDate = new Date(contract.endDate);
+  const endDate = new Date(contract.expirationDate);
   const isExpired = isPast(endDate);
 
   const ExpiryInfo = () => {
@@ -28,14 +28,14 @@ export function ContractCard({ contract }: ContractCardProps) {
     <Card className="flex flex-col">
       <CardHeader>
         <div className="flex items-start justify-between">
-            <CardTitle className="text-lg font-semibold leading-tight pr-4">{contract.title}</CardTitle>
+            <CardTitle className="text-lg font-semibold leading-tight pr-4">{contract.documentName}</CardTitle>
             <div className="flex-shrink-0 p-2 rounded-full bg-accent/10 text-accent">
                 <FileText className="w-5 h-5" />
             </div>
         </div>
         <CardDescription className="flex items-center gap-2 pt-1 text-sm">
             <Users className="w-4 h-4" /> 
-            <span>{contract.parties.join(', ')}</span>
+            <span>{contract.partiesInvolved.join(', ')}</span>
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">

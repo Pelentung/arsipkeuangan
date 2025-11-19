@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from 'lucide-react';
+import { useUser } from '@/firebase';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -21,8 +22,13 @@ function SubmitButton() {
 }
 
 export function AddContractForm({ onSuccess }: { onSuccess: () => void }) {
+  const { user } = useUser();
   const initialState: State = { message: null, errors: {} };
-  const [state, dispatch] = useFormState(addContract, initialState);
+  
+  // We need to bind the userId to the form action
+  const addContractWithUserId = addContract.bind(null);
+
+  const [state, dispatch] = useFormState(addContractWithUserId, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
 
@@ -47,13 +53,14 @@ export function AddContractForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <form ref={formRef} action={dispatch} className="grid gap-4 py-4">
+      <input type="hidden" name="userId" value={user?.uid || ''} />
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="title" className="text-right">
           Title
         </Label>
         <div className="col-span-3">
           <Input id="title" name="title" className="w-full" />
-          {state.errors?.title && <p className="text-sm font-medium text-destructive mt-1">{state.errors.title[0]}</p>}
+          {state.errors?.documentName && <p className="text-sm font-medium text-destructive mt-1">{state.errors.documentName[0]}</p>}
         </div>
       </div>
       <div className="grid grid-cols-4 items-center gap-4">
@@ -62,7 +69,7 @@ export function AddContractForm({ onSuccess }: { onSuccess: () => void }) {
         </Label>
         <div className="col-span-3">
           <Input id="parties" name="parties" placeholder="Comma-separated names" className="w-full" />
-           {state.errors?.parties && <p className="text-sm font-medium text-destructive mt-1">{state.errors.parties[0]}</p>}
+           {state.errors?.partiesInvolved && <p className="text-sm font-medium text-destructive mt-1">{state.errors.partiesInvolved[0]}</p>}
         </div>
       </div>
       <div className="grid grid-cols-4 items-center gap-4">
@@ -71,7 +78,7 @@ export function AddContractForm({ onSuccess }: { onSuccess: () => void }) {
         </Label>
         <div className="col-span-3">
           <Input id="startDate" name="startDate" type="date" className="w-full" />
-           {state.errors?.startDate && <p className="text-sm font-medium text-destructive mt-1">{state.errors.startDate[0]}</p>}
+           {state.errors?.effectiveDate && <p className="text-sm font-medium text-destructive mt-1">{state.errors.effectiveDate[0]}</p>}
         </div>
       </div>
        <div className="grid grid-cols-4 items-center gap-4">
@@ -80,7 +87,7 @@ export function AddContractForm({ onSuccess }: { onSuccess: () => void }) {
         </Label>
         <div className="col-span-3">
           <Input id="endDate" name="endDate" type="date" className="w-full" />
-          {state.errors?.endDate && <p className="text-sm font-medium text-destructive mt-1">{state.errors.endDate[0]}</p>}
+          {state.errors?.expirationDate && <p className="text-sm font-medium text-destructive mt-1">{state.errors.expirationDate[0]}</p>}
         </div>
       </div>
       <div className="grid grid-cols-4 items-start gap-4">
@@ -89,7 +96,7 @@ export function AddContractForm({ onSuccess }: { onSuccess: () => void }) {
         </Label>
         <div className="col-span-3">
           <Textarea id="content" name="content" className="w-full min-h-[150px]" />
-           {state.errors?.content && <p className="text-sm font-medium text-destructive mt-1">{state.errors.content[0]}</p>}
+           {state.errors?.terms && <p className="text-sm font-medium text-destructive mt-1">{state.errors.terms[0]}</p>}
         </div>
       </div>
        {state.errors?.server && <p className="text-sm font-medium text-destructive mt-1 text-center">{state.errors.server[0]}</p>}

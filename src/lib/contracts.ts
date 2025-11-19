@@ -1,14 +1,19 @@
 'use server';
 
 import { collection, getDocs, orderBy, query } from 'firebase/firestore';
-import { db } from './firebase';
+import { initializeFirebase } from '@/firebase';
 import type { Contract } from './types';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { errorEmitter } from '@/firebase/error-emitter';
 
-export async function getContracts(): Promise<Contract[]> {
-  const contractsCol = collection(db, 'contracts');
-  const q = query(contractsCol, orderBy('endDate', 'asc'));
+export async function getContracts(userId: string): Promise<Contract[]> {
+  if (!userId) {
+    return [];
+  }
+  
+  const { firestore } = initializeFirebase();
+  const contractsCol = collection(firestore, 'users', userId, 'contracts');
+  const q = query(contractsCol, orderBy('expirationDate', 'asc'));
 
   try {
     const contractSnapshot = await getDocs(q);
@@ -16,13 +21,14 @@ export async function getContracts(): Promise<Contract[]> {
       const data = doc.data();
       return {
         id: doc.id,
-        title: data.title,
-        parties: data.parties,
-        startDate: data.startDate.toDate().toISOString(),
-        endDate: data.endDate.toDate().toISOString(),
-        content: data.content,
+        userId: data.userId,
+        documentName: data.documentName,
+        partiesInvolved: data.partiesInvolved,
+        effectiveDate: data.effectiveDate.toDate().toISOString(),
+        expirationDate: data.expirationDate.toDate().toISOString(),
+        terms: data.terms,
+        documentUrl: data.documentUrl,
         summary: data.summary,
-        createdAt: data.createdAt.toDate().toISOString(),
       } as Contract;
     });
     return contractList;
@@ -31,8 +37,9 @@ export async function getContracts(): Promise<Contract[]> {
         path: contractsCol.path,
         operation: 'list',
     });
-    errorEmitter.emit('permission-error', permissionError);
-    // Return empty array on error to prevent app crash
+    // We don't use the global error emitter on the server
+    console.error(permissionError);
+    // Return empty array on error to prevent app crash on render
     return [];
   }
 }

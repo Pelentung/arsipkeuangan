@@ -7,6 +7,7 @@ import { AddContractDialog } from '@/components/app/add-contract-dialog';
 import { ContractCard } from '@/components/app/contract-card';
 import { Skeleton } from '../ui/skeleton';
 import { Search } from 'lucide-react';
+import { useUser } from '@/firebase';
 
 interface ContractViewProps {
   initialContracts: Contract[];
@@ -14,14 +15,15 @@ interface ContractViewProps {
 
 export function ContractView({ initialContracts }: ContractViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const { user } = useUser();
 
   const filteredContracts = useMemo(() => {
     if (!searchTerm) return initialContracts;
     return initialContracts.filter(
       (contract) =>
-        contract.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contract.parties.join(', ').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contract.summary.toLowerCase().includes(searchTerm.toLowerCase())
+        contract.documentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.partiesInvolved.join(', ').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (contract.summary && contract.summary.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [initialContracts, searchTerm]);
 

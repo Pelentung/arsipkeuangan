@@ -24,18 +24,41 @@ export default function LoginPage() {
     }
   }, [user, isUserLoading, router]);
 
-  const handleAuthAction = (action: 'login' | 'signup') => (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  const handleAuthAction = async (action: 'login' | 'signup') => {
     setError(null);
     if (!email || !password) {
       setError('Please enter both email and password.');
       return;
     }
-    if (action === 'login') {
-      initiateEmailSignIn(auth, email, password);
-    } else {
-      initiateEmailSignUp(auth, email, password);
+
+    try {
+      if (action === 'login') {
+        await initiateEmailSignIn(auth, email, password);
+      } else {
+        await initiateEmailSignUp(auth, email, password);
+      }
+      // onAuthStateChanged will handle the redirect on success
+    } catch (e: any) {
+      switch (e.code) {
+        case 'auth/invalid-credential':
+          setError('Invalid email or password. Please try again.');
+          break;
+        case 'auth/email-already-in-use':
+          setError('This email is already in use. Please log in.');
+          break;
+        case 'auth/weak-password':
+          setError('The password is too weak. Please choose a stronger password.');
+          break;
+        default:
+          setError('An unexpected error occurred. Please try again.');
+          break;
+      }
     }
+  };
+
+  const handleButtonClick = (action: 'login' | 'signup') => (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    handleAuthAction(action);
   };
   
   if (isUserLoading || user) {
@@ -74,11 +97,11 @@ export default function LoginPage() {
             </div>
             {error && <p className="text-sm font-medium text-destructive">{error}</p>}
             <div className="flex flex-col gap-2">
-                <Button onClick={handleAuthAction('login')} className="w-full">
+                <Button onClick={handleButtonClick('login')} className="w-full">
                   Login
                 </Button>
                 <Separator className="my-2" />
-                 <Button onClick={handleAuthAction('signup')} variant="outline" className="w-full">
+                 <Button onClick={handleButtonClick('signup')} variant="outline" className="w-full">
                   Sign Up
                 </Button>
             </div>

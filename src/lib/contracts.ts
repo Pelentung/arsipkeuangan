@@ -1,8 +1,8 @@
 'use server';
 
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 import { getFirestoreAdmin } from '@/firebase/server-init';
 import type { Contract } from './types';
+import type { Timestamp } from 'firebase-admin/firestore';
 
 export async function getContracts(userId: string): Promise<Contract[]> {
   if (!userId) {
@@ -10,18 +10,18 @@ export async function getContracts(userId: string): Promise<Contract[]> {
   }
   
   const { firestore } = getFirestoreAdmin();
-  const contractsCol = collection(firestore, 'users', userId, 'contracts');
-  const q = query(contractsCol, orderBy('contractDate', 'desc'));
+  const contractsCol = firestore.collection(`users/${userId}/contracts`);
+  const q = contractsCol.orderBy('contractDate', 'desc');
 
   try {
-    const contractSnapshot = await getDocs(q);
+    const contractSnapshot = await q.get();
     const contractList = contractSnapshot.docs.map((doc) => {
       const data = doc.data();
       const contract: Contract = {
         id: doc.id,
         userId: data.userId,
         contractNumber: data.contractNumber,
-        contractDate: data.contractDate.toDate().toISOString(),
+        contractDate: (data.contractDate as Timestamp).toDate().toISOString(),
         description: data.description,
         implementer: data.implementer,
         value: data.value,
@@ -29,15 +29,12 @@ export async function getContracts(userId: string): Promise<Contract[]> {
         remainingValue: data.remainingValue,
       };
       if (data.addendumNumber) contract.addendumNumber = data.addendumNumber;
-      if (data.addendumDate) contract.addendumDate = data.addendumDate.toDate().toISOString();
+      if (data.addendumDate) contract.addendumDate = (data.addendumDate as Timestamp).toDate().toISOString();
       return contract;
     });
     return contractList;
   } catch (error) {
-    // Log a server-appropriate error.
-    // We cannot use the client-side FirestorePermissionError here as this is a server module.
     console.error(`Error fetching contracts for user ${userId}:`, error);
-    // Return empty array on error to prevent app crash on render
     return [];
   }
 }

@@ -1,9 +1,9 @@
 'use server';
 
-import { collection, Timestamp, runTransaction, doc, addDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { getFirestoreAdmin } from '@/firebase/server-init';
+import { FieldValue } from 'firebase-admin/firestore';
 
 const ContractFormSchema = z.object({
   contractNumber: z.string().min(1, 'Nomor kontrak wajib diisi.'),
@@ -89,7 +89,7 @@ export async function addContract(prevState: ContractState, formData: FormData):
   const newContract: any = {
     userId,
     contractNumber,
-    contractDate: Timestamp.fromDate(new Date(contractDate)),
+    contractDate: new Date(contractDate),
     description,
     implementer,
     value,
@@ -98,12 +98,12 @@ export async function addContract(prevState: ContractState, formData: FormData):
   };
 
   if (addendumNumber) newContract.addendumNumber = addendumNumber;
-  if (addendumDate) newContract.addendumDate = Timestamp.fromDate(new Date(addendumDate));
+  if (addendumDate) newContract.addendumDate = new Date(addendumDate);
 
-  const contractsColRef = collection(firestore, 'users', userId, 'contracts');
+  const contractsColRef = firestore.collection(`users/${userId}/contracts`);
   
   try {
-    await addDoc(contractsColRef, newContract);
+    await contractsColRef.add(newContract);
   } catch (error) {
     console.error("Database Error:", error);
     return {
@@ -134,19 +134,24 @@ export async function addBill(prevState: BillState, formData: FormData): Promise
   
   const { firestore } = getFirestoreAdmin();
   const { userId, contractId, amount, billDate, description } = validatedFields.data;
-  const contractRef = doc(firestore, 'users', userId, 'contracts', contractId);
-  const billsColRef = collection(contractRef, 'bills');
+  const contractRef = firestore.doc(`users/${userId}/contracts/${contractId}`);
+  const billsColRef = contractRef.collection('bills');
 
   try {
-    await runTransaction(firestore, async (transaction) => {
+    await firestore.runTransaction(async (transaction) => {
       const contractDoc = await transaction.get(contractRef);
-      if (!contractDoc.exists()) {
+      if (!contractDoc.exists) {
         throw new Error("Kontrak tidak ditemukan!");
       }
 
-      const currentRealization = contractDoc.data().realization || 0;
+      const contractData = contractDoc.data();
+      if (!contractData) {
+        throw new Error("Data kontrak tidak ditemukan!");
+      }
+      
+      const currentRealization = contractData.realization || 0;
       const newRealization = currentRealization + amount;
-      const contractValue = contractDoc.data().value || 0;
+      const contractValue = contractData.value || 0;
       const newRemainingValue = contractValue - newRealization;
 
       // Update the contract
@@ -156,12 +161,12 @@ export async function addBill(prevState: BillState, formData: FormData): Promise
       });
 
       // Add the new bill
-      const newBillRef = doc(billsColRef);
+      const newBillRef = billsColRef.doc();
       transaction.set(newBillRef, {
         amount,
-        billDate: Timestamp.fromDate(new Date(billDate)),
+        billDate: new Date(billDate),
         description,
-        createdAt: Timestamp.now(),
+        createdAt: FieldValue.serverTimestamp(),
       });
     });
   } catch (error) {

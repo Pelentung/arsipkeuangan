@@ -12,7 +12,7 @@
         },
         "userId": {
           "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N Contract). The user ID 'Me11Nd8PpbOfRTYUEQ3R7ylmqDp2' will be the value."
+          "description": "Reference to User. (Relationship: User 1:N Contract). The user ID 'OTgGW8wLTLc569p70e2ARngMN1y1' will be the value."
         },
         "documentName": {
           "type": "string",
@@ -133,7 +133,7 @@
           "params": [
             {
               "name": "userId",
-              "description": "The Firebase UID of the user who owns the contract. It will be 'Me11Nd8PpbOfRTYUEQ3R7ylmqDp2' when requested."
+              "description": "The Firebase UID of the user who owns the contract. It will be 'OTgGW8wLTLc569p70e2ARngMN1y1' when requested."
             },
             {
               "name": "contractId",

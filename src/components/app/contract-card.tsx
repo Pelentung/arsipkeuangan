@@ -2,9 +2,11 @@
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Contract } from '@/lib/types';
-import { FileText, User, Calendar, Coins, Receipt, Wallet } from 'lucide-react';
+import { FileText, User, Calendar, Coins, Receipt, Wallet, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
+import { AddBillDialog } from './add-bill-dialog';
+import { Button } from '../ui/button';
 
 interface ContractCardProps {
   contract: Contract;
@@ -40,21 +42,22 @@ export function ContractCard({ contract }: ContractCardProps) {
       <CardContent className="flex-grow">
         <p className="text-sm text-muted-foreground line-clamp-2">{contract.description}</p>
       </CardContent>
-      <CardFooter className="text-xs text-muted-foreground flex flex-col items-start gap-2">
-        <div className="w-full flex justify-between items-center">
-            <div className="flex items-center gap-2 text-green-600">
+      <CardFooter className="text-xs text-muted-foreground flex flex-col items-start gap-4">
+        <div className="w-full flex justify-between items-center text-sm">
+            <div className="flex items-center gap-2 text-green-600 font-medium">
                 <Coins className="w-4 h-4" />
                 <span>{formatCurrency(contract.value)}</span>
             </div>
-            <div className="flex items-center gap-2 text-blue-600">
+            <div className="flex items-center gap-2 text-blue-600 font-medium">
                 <Receipt className="w-4 h-4" />
                 <span>{formatCurrency(contract.realization)}</span>
             </div>
-            <div className="flex items-center gap-2 text-amber-600">
+            <div className="flex items-center gap-2 text-amber-600 font-medium">
                 <Wallet className="w-4 h-4" />
                 <span>{formatCurrency(contract.remainingValue)}</span>
             </div>
         </div>
+         <AddBillDialog contractId={contract.id} userId={contract.userId} />
       </CardFooter>
     </Card>
   );

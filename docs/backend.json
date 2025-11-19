@@ -60,6 +60,32 @@
         "remainingValue"
       ]
     },
+    "Bill": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Bill",
+      "type": "object",
+      "description": "Represents a single bill or invoice against a contract.",
+      "properties": {
+        "billDate": {
+          "type": "string",
+          "description": "The date the bill was issued.",
+          "format": "date"
+        },
+        "amount": {
+          "type": "number",
+          "description": "The amount of the bill."
+        },
+        "description": {
+          "type": "string",
+          "description": "A short description for the bill."
+        }
+      },
+      "required": [
+        "billDate",
+        "amount",
+        "description"
+      ]
+    },
     "User": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
@@ -135,8 +161,32 @@
             }
           ]
         }
+      },
+      {
+        "path": "/users/{userId}/contracts/{contractId}/bills/{billId}",
+        "definition": {
+            "entityName": "Bill",
+            "schema": {
+                "$ref": "#/backend/entities/Bill"
+            },
+            "description": "Stores individual bills for a specific contract. Authorization is inherited from the parent contract.",
+            "params": [
+                {
+                    "name": "userId",
+                    "description": "The Firebase UID of the user who owns the contract."
+                },
+                {
+                    "name": "contractId",
+                    "description": "The unique ID of the contract document."
+                },
+                {
+                    "name": "billId",
+                    "description": "The unique ID of the bill document."
+                }
+            ]
+        }
       }
     ],
-    "reasoning": "The Firestore structure is designed to ensure secure and efficient management of user contracts. It leverages path-based ownership for private user data, and denormalization to maintain authorization independence. This approach avoids using `get()` calls in security rules, enabling atomic operations and simplifies debugging. The structure also facilitates secure listing operations.\n\nSpecifically:\n\n*   `/users/{userId}`: Stores user profiles. This collection provides a central location for user information and utilizes path-based ownership ensuring only the user (or admins) can access their profile data.\n*   `/users/{userId}/contracts/{contractId}`: Stores contracts owned by a specific user. The `userId` in the path enforces ownership.  No denormalization is needed here as authorization is directly tied to the path.  This enables QAPs because listing contracts is restricted to the contracts of a specific user.\n\nThe key principle applied here is Authorization Independence. The contract documents are stored as subcollections under the respective user's document. This eliminates the need to perform `get()` operations in the security rules, which contributes to more secure and scalable code."
+    "reasoning": "The Firestore structure is designed to ensure secure and efficient management of user contracts. It leverages path-based ownership for private user data, and denormalization to maintain authorization independence. This approach avoids using `get()` calls in security rules, enabling atomic operations and simplifies debugging. The structure also facilitates secure listing operations.\n\nSpecifically:\n\n*   `/users/{userId}`: Stores user profiles. This collection provides a central location for user information and utilizes path-based ownership ensuring only the user (or admins) can access their profile data.\n*   `/users/{userId}/contracts/{contractId}`: Stores contracts owned by a specific user. The `userId` in the path enforces ownership.  No denormalization is needed here as authorization is directly tied to the path.  This enables QAPs because listing contracts is restricted to the contracts of a specific user.\n*   `/users/{userId}/contracts/{contractId}/bills/{billId}`: Stores individual bills related to a contract as a subcollection. This creates a strong hierarchical relationship and ensures bills are queried within the context of a contract."
   }
 }

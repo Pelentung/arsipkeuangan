@@ -11,4 +11,11 @@ export interface Contract {
     realization: number;
     remainingValue: number;
   }
+
+export interface Bill {
+  id: string;
+  billDate: string; // Storing as ISO string
+  amount: number;
+  description: string;
+}
   

@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { addContract, type State } from '@/app/actions';
+import { addContract, type ContractState } from '@/app/actions';
 import { useEffect, useRef, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,7 @@ function SubmitButton() {
 export function AddContractForm() {
   const { user } = useUser();
   const router = useRouter();
-  const initialState: State = { message: null, errors: {} };
+  const initialState: ContractState = { message: null, errors: {} };
   
   const [state, dispatch] = useActionState(addContract, initialState);
   const formRef = useRef<HTMLFormElement>(null);
@@ -38,7 +38,7 @@ export function AddContractForm() {
 
   useEffect(() => {
     if (state.message) {
-      if (state.errors) {
+      if (state.errors && Object.keys(state.errors).length > 0) {
         toast({
           title: 'Kesalahan',
           description: state.message,

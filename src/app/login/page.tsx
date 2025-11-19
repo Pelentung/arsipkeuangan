@@ -69,7 +69,7 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-background">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Akses Gudang Anda</CardTitle>
+          <CardTitle className="text-2xl">SISTEM PEREKAMAN DATA KEUANGAN</CardTitle>
           <CardDescription>Masukkan kredensial Anda di bawah ini untuk mengakses akun Anda.</CardDescription>
         </CardHeader>
         <CardContent>

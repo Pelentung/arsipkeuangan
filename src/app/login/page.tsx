@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth, useUser } from '@/firebase';
-import { initiateEmailSignIn } from '@/firebase/non-blocking-login';
+import { initiateEmailSignIn, initiateEmailSignUp } from '@/firebase/non-blocking-login';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Separator } from '@/components/ui/separator';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -23,14 +24,18 @@ export default function LoginPage() {
     }
   }, [user, isUserLoading, router]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleAuthAction = (action: 'login' | 'signup') => (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setError(null);
     if (!email || !password) {
       setError('Please enter both email and password.');
       return;
     }
-    initiateEmailSignIn(auth, email, password);
+    if (action === 'login') {
+      initiateEmailSignIn(auth, email, password);
+    } else {
+      initiateEmailSignUp(auth, email, password);
+    }
   };
   
   if (isUserLoading || user) {
@@ -41,11 +46,11 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-background">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>Enter your email below to login to your account.</CardDescription>
+          <CardTitle className="text-2xl">Access Your Vault</CardTitle>
+          <CardDescription>Enter your credentials below to access your account.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="grid gap-4">
+          <form className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -68,9 +73,15 @@ export default function LoginPage() {
               />
             </div>
             {error && <p className="text-sm font-medium text-destructive">{error}</p>}
-            <Button type="submit" className="w-full">
-              Login
-            </Button>
+            <div className="flex flex-col gap-2">
+                <Button onClick={handleAuthAction('login')} className="w-full">
+                  Login
+                </Button>
+                <Separator className="my-2" />
+                 <Button onClick={handleAuthAction('signup')} variant="outline" className="w-full">
+                  Sign Up
+                </Button>
+            </div>
           </form>
         </CardContent>
       </Card>

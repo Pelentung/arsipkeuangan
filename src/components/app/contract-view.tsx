@@ -28,26 +28,24 @@ export function ContractView({ initialContracts }: ContractViewProps) {
   }, [initialContracts, searchTerm]);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full mt-8">
       <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Kontrak</h1>
+          <h2 className="text-xl font-bold tracking-tight">Semua Kontrak</h2>
           <p className="text-muted-foreground">
-            Kelola dan tinjau semua kontrak Anda di satu tempat.
+            Cari dan kelola semua kontrak Anda di bawah ini.
           </p>
         </div>
-        <AddContractDialog />
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Cari berdasarkan judul, pihak, atau ringkasan..."
+            className="w-full pl-9"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+       </div>
       </header>
-
-      <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Cari berdasarkan judul, pihak, atau ringkasan..."
-          className="w-full max-w-sm pl-9"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
 
       {filteredContracts.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -74,17 +72,27 @@ export function ContractView({ initialContracts }: ContractViewProps) {
 export function ContractViewSkeleton() {
     return (
       <div className="flex flex-col h-full">
+        {/* Dashboard Skeleton */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <div>
+                <Skeleton className="h-8 w-48 mb-2" />
+                <Skeleton className="h-4 w-72" />
+            </div>
+            <Skeleton className="h-10 w-36" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+            {[...Array(4)].map((_,i) => <Skeleton key={i} className="h-28" />)}
+        </div>
+        <Skeleton className="h-80 w-full mb-8" />
+        
+        {/* Contract List Skeleton */}
         <header className="flex items-center justify-between mb-6">
           <div>
-            <Skeleton className="h-8 w-48 mb-2" />
-            <Skeleton className="h-4 w-72" />
+            <Skeleton className="h-7 w-40 mb-2" />
+            <Skeleton className="h-4 w-64" />
           </div>
-          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-10 w-full max-w-sm" />
         </header>
-
-        <div className="mb-6">
-            <Skeleton className="h-10 w-full max-w-sm" />
-        </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {[...Array(4)].map((_, i) => (
@@ -98,7 +106,7 @@ export function ContractViewSkeleton() {
               </div>
               <div className="mt-4 flex justify-between items-center">
                 <Skeleton className="h-4 w-1/3" />
-                <Skeleton className="h-8 w-8 rounded-full" />
+                 <Skeleton className="h-5 w-5" />
               </div>
             </div>
           ))}

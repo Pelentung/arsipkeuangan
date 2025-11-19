@@ -8,48 +8,41 @@ import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import type { Contract } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Clock, AlertTriangle, CheckCircle, PlusCircle } from 'lucide-react';
+import { FileText, Coins, Receipt, Wallet, PlusCircle } from 'lucide-react';
 import { ContractStatusChart } from '@/components/app/contract-status-chart';
-import { differenceInDays, isPast } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 function Dashboard({ contracts }: { contracts: Contract[] }) {
   const summary = useMemo(() => {
-    const now = new Date();
     const total = contracts.length;
-    const active = contracts.filter(c => !isPast(new Date(c.expirationDate))).length;
-    const expiringSoon = contracts.filter(c => {
-        const endDate = new Date(c.expirationDate);
-        return !isPast(endDate) && differenceInDays(endDate, now) <= 30;
-    }).length;
-    const expired = total - active;
+    const totalValue = contracts.reduce((sum, c) => sum + c.value, 0);
+    const totalRealization = contracts.reduce((sum, c) => sum + c.realization, 0);
+    const totalRemaining = totalValue - totalRealization;
 
-    return { total, active, expiringSoon, expired };
+    return { total, totalValue, totalRealization, totalRemaining };
   }, [contracts]);
 
+  const formatCurrency = (num: number) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+  };
+  
   const chartData = useMemo(() => {
      const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
-     const monthlyData: { [key: string]: { active: number, expired: number, expiringSoon: number } } = {};
+     const monthlyData: { [key: string]: { nilai: number, realisasi: number } } = {};
 
      contracts.forEach(contract => {
-        const expiration = new Date(contract.expirationDate);
-        const month = expiration.getMonth();
-        const year = expiration.getFullYear();
+        const contractDate = new Date(contract.contractDate);
+        const month = contractDate.getMonth();
+        const year = contractDate.getFullYear();
         const key = `${monthNames[month]} ${year}`;
 
         if (!monthlyData[key]) {
-            monthlyData[key] = { active: 0, expired: 0, expiringSoon: 0 };
+            monthlyData[key] = { nilai: 0, realisasi: 0 };
         }
         
-        const now = new Date();
-        if (isPast(expiration)) {
-            monthlyData[key].expired += 1;
-        } else if (differenceInDays(expiration, now) <= 30) {
-            monthlyData[key].expiringSoon += 1;
-        } else {
-            monthlyData[key].active += 1;
-        }
+        monthlyData[key].nilai += contract.value;
+        monthlyData[key].realisasi += contract.realization;
      });
 
     return Object.entries(monthlyData).map(([month, data]) => ({ month, ...data }));
@@ -61,13 +54,13 @@ function Dashboard({ contracts }: { contracts: Contract[] }) {
         <div>
             <h1 className="text-2xl font-bold tracking-tight">Dasbor</h1>
             <p className="text-muted-foreground">
-                Selamat datang! Berikut adalah ringkasan data kontrak Anda.
+                Selamat datang! Berikut adalah ringkasan data keuangan Anda.
             </p>
         </div>
         <Link href="/tambah-kontrak" passHref>
             <Button>
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Tambah Kontrak
+                Tambah Data
             </Button>
         </Link>
       </div>
@@ -84,36 +77,36 @@ function Dashboard({ contracts }: { contracts: Contract[] }) {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Kontrak Aktif</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
+            <CardTitle className="text-sm font-medium">Total Nilai</CardTitle>
+            <Coins className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary.active}</div>
+            <div className="text-2xl font-bold">{formatCurrency(summary.totalValue)}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Akan Berakhir (30 Hari)</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-amber-500" />
+            <CardTitle className="text-sm font-medium">Total Realisasi</CardTitle>
+            <Receipt className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary.expiringSoon}</div>
+            <div className="text-2xl font-bold">{formatCurrency(summary.totalRealization)}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Telah Berakhir</CardTitle>
-            <Clock className="h-4 w-4 text-destructive" />
+            <CardTitle className="text-sm font-medium">Total Sisa</CardTitle>
+            <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary.expired}</div>
+            <div className="text-2xl font-bold">{formatCurrency(summary.totalRemaining)}</div>
           </CardContent>
         </Card>
       </div>
       
       <Card className='mb-8'>
         <CardHeader>
-          <CardTitle>Realisasi Data Kontrak per Bulan</CardTitle>
+          <CardTitle>Realisasi Data Keuangan per Bulan</CardTitle>
         </CardHeader>
         <CardContent className="pl-2">
             <ContractStatusChart data={chartData} />

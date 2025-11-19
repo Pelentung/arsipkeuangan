@@ -15,15 +15,14 @@ interface ContractViewProps {
 
 export function ContractView({ initialContracts }: ContractViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const { user } = useUser();
 
   const filteredContracts = useMemo(() => {
     if (!searchTerm) return initialContracts;
     return initialContracts.filter(
       (contract) =>
-        contract.documentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contract.partiesInvolved.join(', ').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (contract.summary && contract.summary.toLowerCase().includes(searchTerm.toLowerCase()))
+        contract.contractNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.implementer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.description.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [initialContracts, searchTerm]);
 
@@ -31,15 +30,15 @@ export function ContractView({ initialContracts }: ContractViewProps) {
     <div className="flex flex-col h-full mt-8">
       <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-xl font-bold tracking-tight">Semua Kontrak</h2>
+          <h2 className="text-xl font-bold tracking-tight">Semua Data</h2>
           <p className="text-muted-foreground">
-            Cari dan kelola semua kontrak Anda di bawah ini.
+            Cari dan kelola semua data keuangan Anda di bawah ini.
           </p>
         </div>
         <div className="relative w-full max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Cari berdasarkan judul, pihak, atau ringkasan..."
+            placeholder="Cari berdasarkan nomor, pelaksana, atau uraian..."
             className="w-full pl-9"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -55,11 +54,11 @@ export function ContractView({ initialContracts }: ContractViewProps) {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center text-center flex-1 rounded-lg border border-dashed shadow-sm py-12">
-          <h3 className="text-2xl font-bold tracking-tight">Tidak ada kontrak yang ditemukan</h3>
+          <h3 className="text-2xl font-bold tracking-tight">Tidak ada data yang ditemukan</h3>
           <p className="text-sm text-muted-foreground">
             {searchTerm ? 'Coba kata kunci pencarian lain atau ' : 'Mulai dengan '}
             <Link href="/tambah-kontrak">
-                <span className="text-primary hover:underline cursor-pointer">menambahkan kontrak baru</span>
+                <span className="text-primary hover:underline cursor-pointer">menambahkan data baru</span>
             </Link>
             .
           </p>

@@ -10,9 +10,8 @@ import { ChartConfig } from '@/components/ui/chart';
 
 interface ChartData {
     month: string;
-    active: number;
-    expiringSoon: number;
-    expired: number;
+    nilai: number;
+    realisasi: number;
 }
 
 interface ContractStatusChartProps {
@@ -20,16 +19,12 @@ interface ContractStatusChartProps {
 }
 
 const chartConfig = {
-  active: {
-    label: 'Aktif',
+  nilai: {
+    label: 'Nilai',
     color: 'hsl(var(--chart-2))',
   },
-  expiringSoon: {
-    label: 'Akan Berakhir',
-    color: 'hsl(var(--chart-4))',
-  },
-  expired: {
-    label: 'Kadaluarsa',
+  realisasi: {
+    label: 'Realisasi',
     color: 'hsl(var(--chart-1))',
   },
 } satisfies ChartConfig;
@@ -54,15 +49,17 @@ export function ContractStatusChart({ data }: ContractStatusChartProps) {
             axisLine={false}
             tickFormatter={(value) => value.slice(0, 3)}
           />
-           <YAxis allowDecimals={false} />
+           <YAxis 
+            allowDecimals={false}
+            tickFormatter={(value) => new Intl.NumberFormat('id-ID', { notation: 'compact', compactDisplay: 'short' }).format(value as number)}
+           />
           <ChartTooltip
-            content={<ChartTooltipContent />}
+            content={<ChartTooltipContent formatter={(value, name) => `${name}: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value as number)}`} />}
             cursor={false}
           />
           <Legend />
-          <Bar dataKey="active" fill="var(--color-active)" radius={4} stackId="a" />
-          <Bar dataKey="expiringSoon" fill="var(--color-expiringSoon)" radius={4} stackId="a" />
-          <Bar dataKey="expired" fill="var(--color-expired)" radius={4} stackId="a" />
+          <Bar dataKey="nilai" fill="var(--color-nilai)" radius={4} />
+          <Bar dataKey="realisasi" fill="var(--color-realisasi)" radius={4} />
         </BarChart>
       </ResponsiveContainer>
     </ChartContainer>

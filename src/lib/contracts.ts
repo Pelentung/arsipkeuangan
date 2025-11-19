@@ -11,23 +11,26 @@ export async function getContracts(userId: string): Promise<Contract[]> {
   
   const { firestore } = getFirestoreAdmin();
   const contractsCol = collection(firestore, 'users', userId, 'contracts');
-  const q = query(contractsCol, orderBy('expirationDate', 'asc'));
+  const q = query(contractsCol, orderBy('contractDate', 'desc'));
 
   try {
     const contractSnapshot = await getDocs(q);
     const contractList = contractSnapshot.docs.map((doc) => {
       const data = doc.data();
-      return {
+      const contract: Contract = {
         id: doc.id,
         userId: data.userId,
-        documentName: data.documentName,
-        partiesInvolved: data.partiesInvolved,
-        effectiveDate: data.effectiveDate.toDate().toISOString(),
-        expirationDate: data.expirationDate.toDate().toISOString(),
-        terms: data.terms,
-        documentUrl: data.documentUrl,
-        summary: data.summary,
-      } as Contract;
+        contractNumber: data.contractNumber,
+        contractDate: data.contractDate.toDate().toISOString(),
+        description: data.description,
+        implementer: data.implementer,
+        value: data.value,
+        realization: data.realization,
+        remainingValue: data.remainingValue,
+      };
+      if (data.addendumNumber) contract.addendumNumber = data.addendumNumber;
+      if (data.addendumDate) contract.addendumDate = data.addendumDate.toDate().toISOString();
+      return contract;
     });
     return contractList;
   } catch (error) {

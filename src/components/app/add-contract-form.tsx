@@ -3,7 +3,7 @@
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { addContract, type State } from '@/app/actions';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +18,7 @@ function SubmitButton() {
   return (
     <Button type="submit" disabled={pending} className="w-full">
       {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-      Tambah Kontrak
+      Simpan
     </Button>
   );
 }
@@ -31,6 +31,10 @@ export function AddContractForm() {
   const [state, dispatch] = useActionState(addContract, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
+
+  const [value, setValue] = useState(0);
+  const [realization, setRealization] = useState(0);
+  const remainingValue = value - realization;
 
   useEffect(() => {
     if (state.message) {
@@ -51,56 +55,86 @@ export function AddContractForm() {
     }
   }, [state, toast, router]);
 
+  const formatCurrency = (num: number) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+  };
+
+
   return (
-    <form ref={formRef} action={dispatch} className="grid gap-4 py-4">
+    <form ref={formRef} action={dispatch} className="grid gap-6 py-4">
       <input type="hidden" name="userId" value={user?.uid || ''} />
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="title" className="text-right">
-          Judul
-        </Label>
-        <div className="col-span-3">
-          <Input id="title" name="title" className="w-full" />
-          {state.errors?.documentName && <p className="text-sm font-medium text-destructive mt-1">{state.errors.documentName[0]}</p>}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid gap-2">
+            <Label htmlFor="contractNumber">Nomor Kontrak</Label>
+            <Input id="contractNumber" name="contractNumber" />
+            {state.errors?.contractNumber && <p className="text-sm font-medium text-destructive mt-1">{state.errors.contractNumber[0]}</p>}
+        </div>
+        <div className="grid gap-2">
+            <Label htmlFor="contractDate">Tanggal Kontrak</Label>
+            <Input id="contractDate" name="contractDate" type="date" />
+            {state.errors?.contractDate && <p className="text-sm font-medium text-destructive mt-1">{state.errors.contractDate[0]}</p>}
         </div>
       </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="parties" className="text-right">
-          Pihak
-        </Label>
-        <div className="col-span-3">
-          <Input id="parties" name="parties" placeholder="Nama dipisahkan koma" className="w-full" />
-           {state.errors?.partiesInvolved && <p className="text-sm font-medium text-destructive mt-1">{state.errors.partiesInvolved[0]}</p>}
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid gap-2">
+            <Label htmlFor="addendumNumber">Nomor Addendum</Label>
+            <Input id="addendumNumber" name="addendumNumber" placeholder="Opsional" />
+        </div>
+        <div className="grid gap-2">
+            <Label htmlFor="addendumDate">Tanggal Addendum</Label>
+            <Input id="addendumDate" name="addendumDate" type="date" />
         </div>
       </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="startDate" className="text-right">
-          Tanggal Mulai
-        </Label>
-        <div className="col-span-3">
-          <Input id="startDate" name="startDate" type="date" className="w-full" />
-           {state.errors?.effectiveDate && <p className="text-sm font-medium text-destructive mt-1">{state.errors.effectiveDate[0]}</p>}
+
+      <div className="grid gap-2">
+        <Label htmlFor="description">Uraian</Label>
+        <Textarea id="description" name="description" />
+        {state.errors?.description && <p className="text-sm font-medium text-destructive mt-1">{state.errors.description[0]}</p>}
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="implementer">Pelaksana</Label>
+        <Input id="implementer" name="implementer" />
+        {state.errors?.implementer && <p className="text-sm font-medium text-destructive mt-1">{state.errors.implementer[0]}</p>}
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid gap-2">
+            <Label htmlFor="value">Nilai (Rp)</Label>
+            <Input 
+              id="value" 
+              name="value" 
+              type="number" 
+              placeholder="0"
+              value={value}
+              onChange={(e) => setValue(Number(e.target.value))}
+            />
+            {state.errors?.value && <p className="text-sm font-medium text-destructive mt-1">{state.errors.value[0]}</p>}
+        </div>
+        <div className="grid gap-2">
+            <Label htmlFor="realization">Realisasi (Rp)</Label>
+            <Input 
+              id="realization" 
+              name="realization" 
+              type="number" 
+              placeholder="0"
+              value={realization}
+              onChange={(e) => setRealization(Number(e.target.value))}
+            />
+             {state.errors?.realization && <p className="text-sm font-medium text-destructive mt-1">{state.errors.realization[0]}</p>}
+        </div>
+        <div className="grid gap-2">
+            <Label htmlFor="remainingValue">Sisa Kontrak (Rp)</Label>
+            <Input id="remainingValue" name="remainingValue" type="text" readOnly value={formatCurrency(remainingValue)} className="bg-muted" />
+             <input type="hidden" name="remainingValueNumeric" value={remainingValue} />
         </div>
       </div>
-       <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="endDate" className="text-right">
-          Tanggal Selesai
-        </Label>
-        <div className="col-span-3">
-          <Input id="endDate" name="endDate" type="date" className="w-full" />
-          {state.errors?.expirationDate && <p className="text-sm font-medium text-destructive mt-1">{state.errors.expirationDate[0]}</p>}
-        </div>
-      </div>
-      <div className="grid grid-cols-4 items-start gap-4">
-        <Label htmlFor="content" className="text-right pt-2">
-          Konten
-        </Label>
-        <div className="col-span-3">
-          <Textarea id="content" name="content" className="w-full min-h-[150px]" />
-           {state.errors?.terms && <p className="text-sm font-medium text-destructive mt-1">{state.errors.terms[0]}</p>}
-        </div>
-      </div>
+       
        {state.errors?.server && <p className="text-sm font-medium text-destructive mt-1 text-center">{state.errors.server[0]}</p>}
-      <div className="col-start-2 col-span-3">
+      
+      <div>
         <SubmitButton />
       </div>
     </form>

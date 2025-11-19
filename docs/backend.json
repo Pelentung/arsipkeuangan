@@ -4,66 +4,60 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Contract",
       "type": "object",
-      "description": "Represents a contract document and its associated metadata.",
+      "description": "Represents a contract document and its associated financial data.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the contract entity."
-        },
         "userId": {
           "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N Contract). The user ID 'OTgGW8wLTLc569p70e2ARngMN1y1' will be the value."
+          "description": "Reference to User. The user ID 'OTgGW8wLTLc569p70e2ARngMN1y1' will be the value."
         },
-        "documentName": {
+        "contractNumber": {
           "type": "string",
-          "description": "The name of the contract document."
+          "description": "The contract number."
         },
-        "partiesInvolved": {
-          "type": "array",
-          "description": "An array of strings representing the parties involved in the contract.",
-          "items": {
-            "type": "string"
-          }
-        },
-        "effectiveDate": {
+        "contractDate": {
           "type": "string",
-          "description": "The date on which the contract becomes effective.",
-          "format": "date-time"
+          "description": "The date of the contract.",
+          "format": "date"
         },
-        "expirationDate": {
+        "addendumNumber": {
           "type": "string",
-          "description": "The date on which the contract expires.",
-          "format": "date-time"
+          "description": "The addendum contract number, if any."
         },
-        "terms": {
+        "addendumDate": {
           "type": "string",
-          "description": "A description of the terms and conditions of the contract.",
-          "format": "string"
+          "description": "The date of the addendum contract, if any.",
+          "format": "date"
         },
-        "documentUrl": {
+        "description": {
           "type": "string",
-          "description": "URL of the stored contract document in Firestore.",
-          "format": "uri"
+          "description": "A description of the contract's scope."
         },
-        "summary": {
+        "implementer": {
           "type": "string",
-          "description": "AI-generated summary of the contract terms."
+          "description": "The party responsible for implementing the contract."
         },
-        "reminderDate": {
-          "type": "string",
-          "description": "Date for sending reminder notifications regarding contract renewal.",
-          "format": "date-time"
+        "value": {
+          "type": "number",
+          "description": "The total value of the contract."
+        },
+        "realization": {
+          "type": "number",
+          "description": "The amount of the contract that has been realized."
+        },
+        "remainingValue": {
+          "type": "number",
+          "description": "The remaining value of the contract (value - realization)."
         }
       },
       "required": [
-        "id",
         "userId",
-        "documentName",
-        "partiesInvolved",
-        "effectiveDate",
-        "expirationDate",
-        "terms",
-        "documentUrl"
+        "contractNumber",
+        "contractDate",
+        "description",
+        "implementer",
+        "value",
+        "realization",
+        "remainingValue"
       ]
     },
     "User": {

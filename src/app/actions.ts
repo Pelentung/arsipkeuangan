@@ -1,33 +1,32 @@
 'use server';
 
-import { summarizeContract } from '@/ai/flows/summarize-contract';
 import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { collection, Timestamp } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { getFirestoreAdmin } from '@/firebase/server-init';
 
-const FormSchema = z
-  .object({
-    documentName: z.string().min(1, 'Judul wajib diisi.'),
-    partiesInvolved: z.string().min(1, 'Setidaknya satu pihak wajib diisi.'),
-    effectiveDate: z.string().min(1, 'Tanggal mulai wajib diisi.'),
-    expirationDate: z.string().min(1, 'Tanggal berakhir wajib diisi.'),
-    terms: z.string().min(50, 'Konten kontrak harus minimal 50 karakter.'),
-    userId: z.string().min(1, 'ID Pengguna wajib diisi.'),
-  })
-  .refine((data) => new Date(data.effectiveDate) < new Date(data.expirationDate), {
-    message: 'Tanggal berakhir harus setelah tanggal mulai.',
-    path: ['expirationDate'],
-  });
+const FormSchema = z.object({
+  contractNumber: z.string().min(1, 'Nomor kontrak wajib diisi.'),
+  contractDate: z.string().min(1, 'Tanggal kontrak wajib diisi.'),
+  addendumNumber: z.string().optional(),
+  addendumDate: z.string().optional(),
+  description: z.string().min(1, 'Uraian wajib diisi.'),
+  implementer: z.string().min(1, 'Pelaksana wajib diisi.'),
+  value: z.coerce.number().min(0, 'Nilai harus angka positif.'),
+  realization: z.coerce.number().min(0, 'Realisasi harus angka positif.'),
+  remainingValue: z.coerce.number(),
+  userId: z.string().min(1, 'ID Pengguna wajib diisi.'),
+});
 
 export type State = {
   errors?: {
-    documentName?: string[];
-    partiesInvolved?: string[];
-    effectiveDate?: string[];
-    expirationDate?: string[];
-    terms?: string[];
+    contractNumber?: string[];
+    contractDate?: string[];
+    description?: string[];
+    implementer?: string[];
+    value?: string[];
+    realization?: string[];
     userId?: string[];
     server?: string[];
   };
@@ -36,11 +35,15 @@ export type State = {
 
 export async function addContract(prevState: State, formData: FormData): Promise<State> {
   const validatedFields = FormSchema.safeParse({
-    documentName: formData.get('title'),
-    partiesInvolved: formData.get('parties'),
-    effectiveDate: formData.get('startDate'),
-    expirationDate: formData.get('endDate'),
-    terms: formData.get('content'),
+    contractNumber: formData.get('contractNumber'),
+    contractDate: formData.get('contractDate'),
+    addendumNumber: formData.get('addendumNumber'),
+    addendumDate: formData.get('addendumDate'),
+    description: formData.get('description'),
+    implementer: formData.get('implementer'),
+    value: formData.get('value'),
+    realization: formData.get('realization'),
+    remainingValue: formData.get('remainingValueNumeric'),
     userId: formData.get('userId'),
   });
 
@@ -51,26 +54,34 @@ export async function addContract(prevState: State, formData: FormData): Promise
     };
   }
 
-  const { documentName, partiesInvolved, effectiveDate, expirationDate, terms, userId } = validatedFields.data;
+  const {
+    userId,
+    contractNumber,
+    contractDate,
+    addendumNumber,
+    addendumDate,
+    description,
+    implementer,
+    value,
+    realization,
+    remainingValue,
+   } = validatedFields.data;
   const { firestore } = getFirestoreAdmin();
 
   try {
-    const summaryResult = await summarizeContract({ contractText: terms });
-    
-    if (!summaryResult.summary) {
-        throw new Error("Gagal melakukan ringkasan AI.");
-    }
-
-    const newContract = {
-      documentName,
-      partiesInvolved: partiesInvolved.split(',').map((p) => p.trim()),
-      effectiveDate: Timestamp.fromDate(new Date(effectiveDate)),
-      expirationDate: Timestamp.fromDate(new Date(expirationDate)),
-      terms,
-      summary: summaryResult.summary,
+    const newContract: any = {
       userId,
-      documentUrl: '', // Tambahkan placeholder untuk documentUrl
+      contractNumber,
+      contractDate: Timestamp.fromDate(new Date(contractDate)),
+      description,
+      implementer,
+      value,
+      realization,
+      remainingValue,
     };
+
+    if (addendumNumber) newContract.addendumNumber = addendumNumber;
+    if (addendumDate) newContract.addendumDate = Timestamp.fromDate(new Date(addendumDate));
 
     const contractsColRef = collection(firestore, 'users', userId, 'contracts');
     await addDocumentNonBlocking(contractsColRef, newContract);

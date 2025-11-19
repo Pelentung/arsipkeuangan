@@ -23,15 +23,15 @@ export function AddContractDialog({ children }: { children?: ReactNode }) {
         {children || (
           <Button>
             <PlusCircle className="mr-2 h-4 w-4" />
-            Add Contract
+            Tambah Kontrak
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[625px]">
         <DialogHeader>
-          <DialogTitle>Add New Contract</DialogTitle>
+          <DialogTitle>Tambah Kontrak Baru</DialogTitle>
           <DialogDescription>
-            Fill in the details below. The contract content will be summarized using AI.
+            Isi detail di bawah ini. Konten kontrak akan diringkas menggunakan AI.
           </DialogDescription>
         </DialogHeader>
         <AddContractForm onSuccess={() => setOpen(false)} />

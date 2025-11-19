@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import type { Contract } from '@/lib/types';
 import { FileText, Users, CalendarClock } from 'lucide-react';
 import { format, formatDistanceToNow, isPast } from 'date-fns';
+import { id } from 'date-fns/locale';
 
 interface ContractCardProps {
   contract: Contract;
@@ -15,11 +16,11 @@ export function ContractCard({ contract }: ContractCardProps) {
 
   const ExpiryInfo = () => {
     if (isExpired) {
-      return <span className="text-destructive">Expired</span>;
+      return <span className="text-destructive">Kadaluarsa</span>;
     }
     return (
       <span className="text-amber-600">
-        Expires in {formatDistanceToNow(endDate, { addSuffix: false })}
+        Kadaluarsa dalam {formatDistanceToNow(endDate, { addSuffix: false, locale: id })}
       </span>
     );
   };
@@ -44,7 +45,7 @@ export function ContractCard({ contract }: ContractCardProps) {
       <CardFooter className="text-xs text-muted-foreground flex justify-between items-center">
         <div className="flex items-center gap-2">
             <CalendarClock className="w-4 h-4" />
-            <span>{format(endDate, 'MMM d, yyyy')}</span>
+            <span>{format(endDate, 'd MMM yyyy', { locale: id })}</span>
         </div>
         <ExpiryInfo />
       </CardFooter>

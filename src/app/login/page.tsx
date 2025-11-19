@@ -27,7 +27,7 @@ export default function LoginPage() {
   const handleAuthAction = async (action: 'login' | 'signup') => {
     setError(null);
     if (!email || !password) {
-      setError('Please enter both email and password.');
+      setError('Silakan masukkan email dan kata sandi.');
       return;
     }
 
@@ -37,20 +37,20 @@ export default function LoginPage() {
       } else {
         await initiateEmailSignUp(auth, email, password);
       }
-      // onAuthStateChanged will handle the redirect on success
+      // onAuthStateChanged akan menangani pengalihan saat berhasil
     } catch (e: any) {
       switch (e.code) {
         case 'auth/invalid-credential':
-          setError('Invalid email or password. Please try again.');
+          setError('Email atau kata sandi tidak valid. Silakan coba lagi.');
           break;
         case 'auth/email-already-in-use':
-          setError('This email is already in use. Please log in.');
+          setError('Email ini sudah digunakan. Silakan masuk.');
           break;
         case 'auth/weak-password':
-          setError('The password is too weak. Please choose a stronger password.');
+          setError('Kata sandi terlalu lemah. Silakan pilih kata sandi yang lebih kuat.');
           break;
         default:
-          setError('An unexpected error occurred. Please try again.');
+          setError('Terjadi kesalahan tak terduga. Silakan coba lagi.');
           break;
       }
     }
@@ -62,15 +62,15 @@ export default function LoginPage() {
   };
   
   if (isUserLoading || user) {
-    return null; // Or a loading spinner
+    return null; // Atau spinner pemuatan
   }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Access Your Vault</CardTitle>
-          <CardDescription>Enter your credentials below to access your account.</CardDescription>
+          <CardTitle className="text-2xl">Akses Gudang Anda</CardTitle>
+          <CardDescription>Masukkan kredensial Anda di bawah ini untuk mengakses akun Anda.</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="grid gap-4">
@@ -86,7 +86,7 @@ export default function LoginPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Kata Sandi</Label>
               <Input 
                 id="password" 
                 type="password" 
@@ -98,11 +98,11 @@ export default function LoginPage() {
             {error && <p className="text-sm font-medium text-destructive">{error}</p>}
             <div className="flex flex-col gap-2">
                 <Button onClick={handleButtonClick('login')} className="w-full">
-                  Login
+                  Masuk
                 </Button>
                 <Separator className="my-2" />
                  <Button onClick={handleButtonClick('signup')} variant="outline" className="w-full">
-                  Sign Up
+                  Daftar
                 </Button>
             </div>
           </form>

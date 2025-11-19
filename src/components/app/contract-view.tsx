@@ -31,9 +31,9 @@ export function ContractView({ initialContracts }: ContractViewProps) {
     <div className="flex flex-col h-full">
       <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Contracts</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Kontrak</h1>
           <p className="text-muted-foreground">
-            Manage and review all your contracts in one place.
+            Kelola dan tinjau semua kontrak Anda di satu tempat.
           </p>
         </div>
         <AddContractDialog />
@@ -42,7 +42,7 @@ export function ContractView({ initialContracts }: ContractViewProps) {
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search by title, parties, or summary..."
+          placeholder="Cari berdasarkan judul, pihak, atau ringkasan..."
           className="w-full max-w-sm pl-9"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -57,11 +57,11 @@ export function ContractView({ initialContracts }: ContractViewProps) {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center text-center flex-1 rounded-lg border border-dashed shadow-sm py-12">
-          <h3 className="text-2xl font-bold tracking-tight">No contracts found</h3>
+          <h3 className="text-2xl font-bold tracking-tight">Tidak ada kontrak yang ditemukan</h3>
           <p className="text-sm text-muted-foreground">
-            {searchTerm ? 'Try a different search term or ' : 'Get started by '}
+            {searchTerm ? 'Coba kata kunci pencarian lain atau ' : 'Mulai dengan '}
             <AddContractDialog>
-                <span className="text-primary hover:underline cursor-pointer">adding a new contract</span>
+                <span className="text-primary hover:underline cursor-pointer">menambahkan kontrak baru</span>
             </AddContractDialog>
             .
           </p>

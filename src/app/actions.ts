@@ -9,15 +9,15 @@ import { getFirestoreAdmin } from '@/firebase/server-init';
 
 const FormSchema = z
   .object({
-    documentName: z.string().min(1, 'Title is required.'),
-    partiesInvolved: z.string().min(1, 'At least one party is required.'),
-    effectiveDate: z.string().min(1, 'Start date is required.'),
-    expirationDate: z.string().min(1, 'End date is required.'),
-    terms: z.string().min(50, 'Contract content must be at least 50 characters.'),
-    userId: z.string().min(1, 'User ID is required.'),
+    documentName: z.string().min(1, 'Judul wajib diisi.'),
+    partiesInvolved: z.string().min(1, 'Setidaknya satu pihak wajib diisi.'),
+    effectiveDate: z.string().min(1, 'Tanggal mulai wajib diisi.'),
+    expirationDate: z.string().min(1, 'Tanggal berakhir wajib diisi.'),
+    terms: z.string().min(50, 'Konten kontrak harus minimal 50 karakter.'),
+    userId: z.string().min(1, 'ID Pengguna wajib diisi.'),
   })
   .refine((data) => new Date(data.effectiveDate) < new Date(data.expirationDate), {
-    message: 'End date must be after start date.',
+    message: 'Tanggal berakhir harus setelah tanggal mulai.',
     path: ['expirationDate'],
   });
 
@@ -47,7 +47,7 @@ export async function addContract(prevState: State, formData: FormData): Promise
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Failed to add contract. Please check the fields.',
+      message: 'Gagal menambahkan kontrak. Silakan periksa kembali isian Anda.',
     };
   }
 
@@ -58,7 +58,7 @@ export async function addContract(prevState: State, formData: FormData): Promise
     const summaryResult = await summarizeContract({ contractText: terms });
     
     if (!summaryResult.summary) {
-        throw new Error("AI summarization failed.");
+        throw new Error("Gagal melakukan ringkasan AI.");
     }
 
     const newContract = {
@@ -69,7 +69,7 @@ export async function addContract(prevState: State, formData: FormData): Promise
       terms,
       summary: summaryResult.summary,
       userId,
-      documentUrl: '', // Add a placeholder for documentUrl
+      documentUrl: '', // Tambahkan placeholder untuk documentUrl
     };
 
     const contractsColRef = collection(firestore, 'users', userId, 'contracts');
@@ -78,11 +78,11 @@ export async function addContract(prevState: State, formData: FormData): Promise
   } catch (error) {
     console.error(error);
     return {
-      errors: { server: ['An unexpected error occurred. Could not save contract.'] },
-      message: 'Database Error: Failed to Add Contract.',
+      errors: { server: ['Terjadi kesalahan tak terduga. Tidak dapat menyimpan kontrak.'] },
+      message: 'Kesalahan Database: Gagal Menambahkan Kontrak.',
     };
   }
 
   revalidatePath('/');
-  return { message: 'Successfully added contract.' };
+  return { message: 'Berhasil menambahkan kontrak.' };
 }

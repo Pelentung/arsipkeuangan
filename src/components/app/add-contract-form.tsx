@@ -16,7 +16,7 @@ function SubmitButton() {
   return (
     <Button type="submit" disabled={pending} className="w-full">
       {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-      Add Contract
+      Tambah Kontrak
     </Button>
   );
 }
@@ -36,13 +36,13 @@ export function AddContractForm({ onSuccess }: { onSuccess: () => void }) {
     if (state.message) {
       if (state.errors) {
         toast({
-          title: 'Error',
+          title: 'Kesalahan',
           description: state.message,
           variant: 'destructive',
         });
       } else {
         toast({
-          title: 'Success',
+          title: 'Sukses',
           description: state.message,
         });
         formRef.current?.reset();
@@ -56,7 +56,7 @@ export function AddContractForm({ onSuccess }: { onSuccess: () => void }) {
       <input type="hidden" name="userId" value={user?.uid || ''} />
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="title" className="text-right">
-          Title
+          Judul
         </Label>
         <div className="col-span-3">
           <Input id="title" name="title" className="w-full" />
@@ -65,16 +65,16 @@ export function AddContractForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="parties" className="text-right">
-          Parties
+          Pihak
         </Label>
         <div className="col-span-3">
-          <Input id="parties" name="parties" placeholder="Comma-separated names" className="w-full" />
+          <Input id="parties" name="parties" placeholder="Nama dipisahkan koma" className="w-full" />
            {state.errors?.partiesInvolved && <p className="text-sm font-medium text-destructive mt-1">{state.errors.partiesInvolved[0]}</p>}
         </div>
       </div>
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="startDate" className="text-right">
-          Start Date
+          Tanggal Mulai
         </Label>
         <div className="col-span-3">
           <Input id="startDate" name="startDate" type="date" className="w-full" />
@@ -83,7 +83,7 @@ export function AddContractForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
        <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="endDate" className="text-right">
-          End Date
+          Tanggal Selesai
         </Label>
         <div className="col-span-3">
           <Input id="endDate" name="endDate" type="date" className="w-full" />
@@ -92,7 +92,7 @@ export function AddContractForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
       <div className="grid grid-cols-4 items-start gap-4">
         <Label htmlFor="content" className="text-right pt-2">
-          Content
+          Konten
         </Label>
         <div className="col-span-3">
           <Textarea id="content" name="content" className="w-full min-h-[150px]" />

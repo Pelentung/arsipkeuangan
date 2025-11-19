@@ -14,12 +14,12 @@ import {z} from 'genkit';
 const SummarizeContractInputSchema = z.object({
   contractText: z
     .string()
-    .describe('The text of the contract to be summarized.'),
+    .describe('Teks kontrak yang akan diringkas.'),
 });
 export type SummarizeContractInput = z.infer<typeof SummarizeContractInputSchema>;
 
 const SummarizeContractOutputSchema = z.object({
-  summary: z.string().describe('A concise summary of the key terms of the contract.'),
+  summary: z.string().describe('Ringkasan singkat dari syarat-syarat utama kontrak.'),
 });
 export type SummarizeContractOutput = z.infer<typeof SummarizeContractOutputSchema>;
 
@@ -31,9 +31,9 @@ const prompt = ai.definePrompt({
   name: 'summarizeContractPrompt',
   input: {schema: SummarizeContractInputSchema},
   output: {schema: SummarizeContractOutputSchema},
-  prompt: `You are an expert legal professional specializing in contract summarization. Please provide a concise summary of the key terms of the following contract.  Focus on obligations of the parties, dates, and payment terms.
+  prompt: `Anda adalah seorang profesional hukum ahli yang berspesialisasi dalam peringkasan kontrak. Harap berikan ringkasan singkat dari syarat-syarat utama dari kontrak berikut. Fokus pada kewajiban para pihak, tanggal, dan syarat pembayaran.
 
-Contract Text:
+Teks Kontrak:
 {{{contractText}}}`,
 });
 

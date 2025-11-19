@@ -87,31 +87,25 @@ export async function addContract(prevState: ContractState, formData: FormData):
    } = validatedFields.data;
   const { firestore } = getFirestoreAdmin();
 
-  try {
-    const newContract: any = {
-      userId,
-      contractNumber,
-      contractDate: Timestamp.fromDate(new Date(contractDate)),
-      description,
-      implementer,
-      value,
-      realization,
-      remainingValue,
-    };
+  const newContract: any = {
+    userId,
+    contractNumber,
+    contractDate: Timestamp.fromDate(new Date(contractDate)),
+    description,
+    implementer,
+    value,
+    realization,
+    remainingValue,
+  };
 
-    if (addendumNumber) newContract.addendumNumber = addendumNumber;
-    if (addendumDate) newContract.addendumDate = Timestamp.fromDate(new Date(addendumDate));
+  if (addendumNumber) newContract.addendumNumber = addendumNumber;
+  if (addendumDate) newContract.addendumDate = Timestamp.fromDate(new Date(addendumDate));
 
-    const contractsColRef = collection(firestore, 'users', userId, 'contracts');
-    await addDocumentNonBlocking(contractsColRef, newContract);
-
-  } catch (error) {
-    console.error(error);
-    return {
-      errors: { server: ['Terjadi kesalahan tak terduga. Tidak dapat menyimpan kontrak.'] },
-      message: 'Kesalahan Database: Gagal Menambahkan Kontrak.',
-    };
-  }
+  const contractsColRef = collection(firestore, 'users', userId, 'contracts');
+  
+  // Call the non-blocking function without await and without a try/catch block.
+  // Error handling (specifically for permissions) is handled within addDocumentNonBlocking.
+  addDocumentNonBlocking(contractsColRef, newContract);
 
   revalidatePath('/');
   return { message: 'Berhasil menambahkan kontrak.' };

@@ -80,12 +80,13 @@ export function ContractView() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredContracts.map((contract) => (
+              {filteredContracts.map((contract, index) => (
                 <ContractTableRow
                     key={contract.id}
                     contract={contract}
                     isOpen={openStates[contract.id] || false}
                     onToggle={() => toggleRow(contract.id)}
+                    isEven={index % 2 === 0}
                 />
               ))}
             </TableBody>

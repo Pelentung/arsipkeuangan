@@ -33,12 +33,14 @@ interface ContractTableRowProps {
   contract: Contract;
   isOpen: boolean;
   onToggle: () => void;
+  isEven: boolean;
 }
 
 export default function ContractTableRow({
   contract,
   isOpen,
   onToggle,
+  isEven,
 }: ContractTableRowProps) {
   const { user } = useUser();
   const contractDate = new Date(contract.contractDate);
@@ -56,7 +58,7 @@ export default function ContractTableRow({
   return (
     <>
       <TableRow
-        className="bg-card hover:bg-card/90"
+        className={cn(isEven ? 'bg-card' : 'bg-muted/30', "hover:bg-muted/50")}
         data-state={isOpen ? 'open' : 'closed'}
       >
         <TableCell onClick={onToggle} className="cursor-pointer align-top">

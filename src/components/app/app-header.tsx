@@ -20,6 +20,7 @@ import Link from 'next/link';
 import { AppIcon } from './app-icon';
 import { usePathname } from 'next/navigation';
 
+
 const navItems = [
     { href: '/dashboard', label: 'Data Kontrak', icon: Home },
     { href: '/laporan', label: 'Laporan', icon: ClipboardList },
@@ -29,6 +30,7 @@ export function AppHeader() {
   const { user } = useUser();
   const auth = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleLogout = async () => {
     try {
@@ -39,12 +41,52 @@ export function AppHeader() {
     }
   };
 
+  const NavLinks = ({ isMobile = false }: { isMobile?: boolean }) => (
+    <>
+      {navItems.map(({ href, label, icon: Icon }) => {
+        const isActive = pathname === href;
+        return (
+          <Link
+            key={label}
+            href={href}
+            className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary ${
+              isMobile ? 'text-lg' : 'text-sm'
+            } ${isActive ? 'bg-secondary text-primary' : 'text-muted-foreground'}`}
+          >
+            <Icon className={isMobile ? 'h-5 w-5' : 'h-4 w-4'} />
+            {label}
+          </Link>
+        );
+      })}
+    </>
+  );
+
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 sm:py-4">
-      <div className="flex-1 md:hidden">
-        {/* This is the mobile menu trigger, now part of the header */}
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b bg-card px-4 sm:px-6">
+      <div className='flex items-center gap-4'>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button size="icon" variant="outline" className="md:hidden">
+              <PanelLeft className="h-5 w-5" />
+              <span className="sr-only">Beralih Navigasi</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-64 p-0 flex flex-col">
+            <div className="flex items-center gap-2 h-16 border-b px-6">
+                <AppIcon className="w-6 h-6 text-primary" />
+                <span className="font-semibold font-headline text-lg">ARSIP DATA KONTRAK</span>
+            </div>
+            <nav className="grid gap-2 text-lg font-medium p-4 flex-1">
+               <NavLinks isMobile />
+            </nav>
+          </SheetContent>
+        </Sheet>
+         <div className="hidden md:flex items-center gap-2 font-semibold">
+           <AppIcon className="w-6 h-6 text-primary" />
+          <span className="font-semibold font-headline">ARSIP DATA KONTRAK</span>
+        </div>
       </div>
-      <div className="flex-1" />
+      
       {user && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

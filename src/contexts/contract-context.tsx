@@ -5,19 +5,16 @@ import {
   createContext,
   useContext,
   ReactNode,
-  useState,
-  useEffect,
   useCallback,
   useMemo,
 } from 'react';
-import { useFirestore, useUser, useCollection } from '@/firebase';
+import { useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase';
 import {
   collection,
   doc,
   addDoc,
   updateDoc,
   deleteDoc,
-  writeBatch,
   query,
   where,
   serverTimestamp,
@@ -29,7 +26,7 @@ import { FirestorePermissionError } from '@/firebase/errors';
 type ContractContextType = {
   contracts: Contract[];
   loading: boolean;
-  addContract: (newContractData: Omit<Contract, 'id'| 'realization' | 'remainingValue' | 'bills'>) => void;
+  addContract: (newContractData: Omit<Contract, 'id'| 'realization' | 'remainingValue' | 'bills' | 'userId'>) => void;
   updateContract: (contractId: string, updatedData: Partial<Omit<Contract, 'id' | 'userId' | 'bills'>>) => void;
   deleteContract: (contractId: string) => void;
   addBill: (contractId: string, bill: Omit<Bill, 'id'>) => void;
@@ -49,46 +46,53 @@ export function useContractContext() {
 }
 
 function fromTimestamp(timestamp: Timestamp | Date): string {
-    if (timestamp instanceof Timestamp) {
-        return timestamp.toDate().toISOString();
-    }
-    return timestamp.toISOString();
+    if (!timestamp) return '';
+    const date = timestamp instanceof Timestamp ? timestamp.toDate() : timestamp;
+    return date.toISOString();
 }
 
 export function useContractContextData(): ContractContextType {
   const { user } = useUser();
   const firestore = useFirestore();
 
-  const contractsQuery = useMemo(() => {
-    if (!firestore || !user) return null;
-    return query(collection(firestore, 'contracts'), where('userId', '==', user.uid));
-  }, [firestore, user]);
+  const contractsCollectionRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'contracts');
+  }, [firestore]);
 
-  const { data: contractsData, loading: contractsLoading } = useCollection(contractsQuery, {
-      idField: 'id',
-      transform: (data) => {
-        // Firestore data can be nested, so we need to transform it
-        return {
-            ...data,
-            contractDate: fromTimestamp(data.contractDate),
-            addendumDate: data.addendumDate ? fromTimestamp(data.addendumDate) : undefined,
-            bills: data.bills?.map((bill: any) => ({
-                ...bill,
-                spmDate: fromTimestamp(bill.spmDate),
-                sp2dDate: fromTimestamp(bill.sp2dDate),
-            })) || [],
-        } as Contract;
-      }
+  const contractsQuery = useMemoFirebase(() => {
+    if (!firestore || !user || !contractsCollectionRef) return null;
+    return query(contractsCollectionRef, where('userId', '==', user.uid));
+  }, [firestore, user, contractsCollectionRef]);
+
+  const { data: contractsData, isLoading: contractsLoading } = useCollection(contractsQuery, {
+      snapshotListenOptions: { includeMetadataChanges: true },
+      // The transform function was removed, as it's not a valid option for useCollection
   });
   
-  const contracts = useMemo(() => contractsData || [], [contractsData]);
+  const contracts = useMemo(() => {
+    if (!contractsData) return [];
+    return contractsData.map((contract: any) => ({
+      ...contract,
+      id: contract.id,
+      contractDate: fromTimestamp(contract.contractDate),
+      addendumDate: contract.addendumDate ? fromTimestamp(contract.addendumDate) : undefined,
+      bills: contract.bills?.map((bill: any) => ({
+          ...bill,
+          spmDate: fromTimestamp(bill.spmDate),
+          sp2dDate: fromTimestamp(bill.sp2dDate),
+      })) || [],
+    }));
+  }, [contractsData]);
+  
   const loading = contractsLoading;
 
-  const addContract = useCallback(async (newContractData: Omit<Contract, 'id'| 'realization' | 'remainingValue' | 'bills'>) => {
-    if (!firestore) return;
+  const addContract = useCallback(async (newContractData: Omit<Contract, 'id'| 'realization' | 'remainingValue' | 'bills' | 'userId'>) => {
+    if (!firestore || !user) return;
     const contractsCollection = collection(firestore, 'contracts');
     const dataToSave = {
       ...newContractData,
+      userId: user.uid,
       realization: 0,
       remainingValue: newContractData.value,
       bills: [],
@@ -103,7 +107,7 @@ export function useContractContextData(): ContractContextType {
       });
       errorEmitter.emit('permission-error', permissionError);
     });
-  }, [firestore]);
+  }, [firestore, user]);
 
 
   const updateContract = useCallback(async (contractId: string, updatedData: Partial<Omit<Contract, 'id' | 'userId' | 'bills'>>) => {

@@ -17,15 +17,15 @@ import type { Contract } from '@/lib/types';
 export default function UbahKontrakPage() {
   const { id } = useParams();
   const router = useRouter();
-  const { user, loading: userLoading } = useUser();
+  const { user, isUserLoading } = useUser();
   const { getContractById, loading: contractsLoading } = useContractContext();
   const [contract, setContract] = useState<Contract | null>(null);
 
   useEffect(() => {
-    if (!userLoading && !user) {
+    if (!isUserLoading && !user) {
       router.replace('/login');
     }
-  }, [user, userLoading, router]);
+  }, [user, isUserLoading, router]);
 
   useEffect(() => {
     if (contractsLoading || !user) return; // Wait until data is loaded
@@ -42,25 +42,23 @@ export default function UbahKontrakPage() {
     } else {
       router.push('/');
     }
-  }, [id, getContractById, contractsLoading, router, user, userLoading]);
+  }, [id, getContractById, contractsLoading, router, user, isUserLoading]);
 
-  if (userLoading || contractsLoading || !contract) {
+  if (isUserLoading || contractsLoading || !contract) {
     return <p>Memuat data kontrak...</p>;
   }
 
   return (
-    <main className="flex-1 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
-      <Card className="w-full max-w-4xl">
-        <CardHeader>
-          <CardTitle>Ubah Data Keuangan</CardTitle>
-          <CardDescription>
-            Perbarui detail di bawah ini untuk mengubah data yang sudah ada.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <EditContractForm contract={contract} />
-        </CardContent>
-      </Card>
-    </main>
+    <Card className="w-full max-w-4xl">
+      <CardHeader>
+        <CardTitle>Ubah Data Keuangan</CardTitle>
+        <CardDescription>
+          Perbarui detail di bawah ini untuk mengubah data yang sudah ada.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <EditContractForm contract={contract} />
+      </CardContent>
+    </Card>
   );
 }

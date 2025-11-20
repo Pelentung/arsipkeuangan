@@ -11,14 +11,14 @@ import { useRouter } from 'next/navigation';
 
 export default function LaporanPage() {
     const { contracts } = useContractContext();
-    const { user, loading: userLoading } = useUser();
+    const { user, isUserLoading } = useUser();
     const router = useRouter();
 
     useEffect(() => {
-        if (!userLoading && !user) {
+        if (!isUserLoading && !user) {
             router.push('/login');
         }
-    }, [user, userLoading, router]);
+    }, [user, isUserLoading, router]);
 
     const escapeCsvCell = (cell: any): string => {
         if (cell === null || cell === undefined) {
@@ -107,12 +107,12 @@ export default function LaporanPage() {
         }
     };
 
-    if (userLoading || !user) {
+    if (isUserLoading || !user) {
         return <p>Memuat...</p>;
     }
     
     return (
-        <main className="flex-1 flex-col p-4 sm:p-6 lg:p-8">
+        <>
              <Card className="w-full mb-8">
                 <CardHeader className='flex-row items-center justify-between'>
                     <div>
@@ -129,6 +129,6 @@ export default function LaporanPage() {
             </Card>
 
             <ContractView />
-        </main>
+        </>
     );
 }

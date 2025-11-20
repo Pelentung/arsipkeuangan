@@ -18,7 +18,7 @@ const navItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const { user, claims } = useUser();
+  const { user } = useUser();
   const auth = useAuth();
   const router = useRouter();
 
@@ -66,12 +66,12 @@ export function AppSidebar() {
             <div className='border-t pt-4'>
                 <div className='flex items-center gap-3 px-3 py-2'>
                     <Avatar className="h-9 w-9">
-                        <AvatarImage src={claims?.picture} alt="Avatar" />
-                        <AvatarFallback>{claims?.name?.[0] || 'T'}</AvatarFallback>
+                        <AvatarImage src={user.photoURL ?? undefined} alt="Avatar" />
+                        <AvatarFallback>{user.displayName?.[0] || 'T'}</AvatarFallback>
                     </Avatar>
                     <div className='flex flex-col'>
-                        <p className='text-sm font-medium leading-none'>{claims?.name || 'Tamu'}</p>
-                        <p className='text-xs leading-none text-muted-foreground'>{claims?.email || 'Login sebagai tamu'}</p>
+                        <p className='text-sm font-medium leading-none'>{user.displayName || 'Tamu'}</p>
+                        <p className='text-xs leading-none text-muted-foreground'>{user.email || 'Login sebagai tamu'}</p>
                     </div>
                 </div>
                  <Button variant="ghost" className="w-full justify-start mt-2" onClick={handleLogout}>
@@ -102,12 +102,12 @@ export function AppSidebar() {
               <div className='border-t p-4'>
                   <div className='flex items-center gap-3 px-3 py-2 mb-2'>
                       <Avatar className="h-10 w-10">
-                          <AvatarImage src={claims?.picture} alt="Avatar" />
-                          <AvatarFallback>{claims?.name?.[0] || 'T'}</AvatarFallback>
+                          <AvatarImage src={user.photoURL ?? undefined} alt="Avatar" />
+                          <AvatarFallback>{user.displayName?.[0] || 'T'}</AvatarFallback>
                       </Avatar>
                       <div>
-                          <p className='text-base font-medium leading-none'>{claims?.name || 'Tamu'}</p>
-                          <p className='text-sm text-muted-foreground'>{claims?.email || 'Login sebagai tamu'}</p>
+                          <p className='text-base font-medium leading-none'>{user.displayName || 'Tamu'}</p>
+                          <p className='text-sm text-muted-foreground'>{user.email || 'Login sebagai tamu'}</p>
                       </div>
                   </div>
                   <Button variant="ghost" className="w-full justify-start text-lg" onClick={handleLogout}>

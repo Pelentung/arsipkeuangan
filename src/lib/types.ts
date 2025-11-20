@@ -27,9 +27,3 @@ export interface Bill {
   amount: number;
   status: 'Uang Muka (DP)' | 'Termin' | 'Termin Terakhir';
 }
-  
-export interface UserClaims {
-  name?: string;
-  picture?: string;
-  email?: string;
-}

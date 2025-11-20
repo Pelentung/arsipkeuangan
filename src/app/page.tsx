@@ -13,14 +13,14 @@ import { useRouter } from 'next/navigation';
 
 function Dashboard() {
   const { contracts, loading } = useContractContext();
-  const { user, claims, loading: userLoading } = useUser();
+  const { user, isUserLoading } = useUser();
   const router = useRouter();
 
   useEffect(() => {
-    if (!userLoading && !user) {
+    if (!isUserLoading && !user) {
       router.push('/login');
     }
-  }, [user, userLoading, router]);
+  }, [user, isUserLoading, router]);
 
   const summary = useMemo(() => {
     if (loading || !contracts) {
@@ -45,6 +45,7 @@ function Dashboard() {
 
      contracts.forEach(contract => {
         const contractDate = new Date(contract.contractDate);
+        if (isNaN(contractDate.getTime())) return;
         const month = contractDate.getMonth();
         const year = contractDate.getFullYear();
         const key = `${monthNames[month]} ${year}`;
@@ -60,7 +61,7 @@ function Dashboard() {
     return Object.entries(monthlyData).map(([month, data]) => ({ month, ...data }));
   }, [contracts, loading]);
 
-  if (userLoading || !user) {
+  if (isUserLoading || !user) {
     return <p>Mengalihkan ke halaman login...</p>;
   }
 
@@ -70,7 +71,7 @@ function Dashboard() {
         <div>
             <h1 className="text-2xl font-bold tracking-tight">Data Kontrak</h1>
             <p className="text-muted-foreground">
-                Selamat datang, {claims?.name || 'Pengguna'}! Berikut adalah ringkasan data keuangan Anda.
+                Selamat datang, {user?.displayName || 'Pengguna'}! Berikut adalah ringkasan data keuangan Anda.
             </p>
         </div>
         <Link href="/tambah-kontrak" passHref>
@@ -136,10 +137,8 @@ function Dashboard() {
 
 export default function Home() {
   return (
-      <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
-        <Suspense fallback={<p>Memuat...</p>}>
-          <Dashboard />
-        </Suspense>
-      </main>
+      <Suspense fallback={<p>Memuat...</p>}>
+        <Dashboard />
+      </Suspense>
   );
 }

@@ -7,32 +7,30 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function TambahKontrakPage() {
-    const { user, loading } = useUser();
+    const { user, isUserLoading } = useUser();
     const router = useRouter();
 
     useEffect(() => {
-        if (!loading && !user) {
+        if (!isUserLoading && !user) {
             router.replace('/login');
         }
-    }, [user, loading, router]);
+    }, [user, isUserLoading, router]);
 
-    if (loading || !user) {
+    if (isUserLoading || !user) {
         return <p>Memuat...</p>
     }
 
     return (
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
-            <Card className="w-full max-w-4xl">
-                <CardHeader>
-                    <CardTitle>Tambah Data Keuangan Baru</CardTitle>
-                    <CardDescription>
-                        Isi detail di bawah ini untuk menambahkan data baru ke dalam sistem.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <AddContractForm />
-                </CardContent>
-            </Card>
-        </main>
+        <Card className="w-full max-w-4xl">
+            <CardHeader>
+                <CardTitle>Tambah Data Keuangan Baru</CardTitle>
+                <CardDescription>
+                    Isi detail di bawah ini untuk menambahkan data baru ke dalam sistem.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <AddContractForm />
+            </CardContent>
+        </Card>
     );
 }

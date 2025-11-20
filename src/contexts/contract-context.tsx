@@ -8,7 +8,7 @@ import {
   useCallback,
   useMemo,
 } from 'react';
-import { useFirestore, useUser, useMemoFirebase, useCollection } from '@/firebase';
+import { useFirestore, useUser, useCollection } from '@/firebase';
 import {
   collection,
   doc,
@@ -49,20 +49,16 @@ function fromTimestamp(timestamp: Timestamp | Date | string): string {
     if (timestamp instanceof Timestamp) {
         date = timestamp.toDate();
     } else if (typeof timestamp === 'string') {
-        // Attempt to parse string. Handles ISO strings and other formats.
         date = new Date(timestamp);
     } else {
-        // Assumes it's already a Date object
         date = timestamp;
     }
-    // Check if the date is valid before calling toISOString
     if (isNaN(date.getTime())) {
-        return ''; // Or handle invalid date strings as you see fit
+        return ''; 
     }
     return date.toISOString();
 }
 
-// Function to remove undefined properties from an object
 const removeUndefinedProps = (obj: any) => {
   const newObj: any = {};
   Object.keys(obj).forEach(key => {
@@ -78,9 +74,9 @@ export function useContractContextData(): ContractContextType {
   const { user } = useUser();
   const firestore = useFirestore();
 
-  const contractsCollectionRef = useMemoFirebase(() => {
+  const contractsCollectionRef = useMemo(() => {
     if (!firestore || !user) return null;
-    return collection(firestore, 'users', user.uid, 'contracts');
+    return collection(firestore, 'contracts');
   }, [firestore, user]);
 
   const { data: contractsData, isLoading: contractsLoading } = useCollection(contractsCollectionRef, {
@@ -182,7 +178,7 @@ export function useContractContextData(): ContractContextType {
     const newRemainingValue = originalContract.value - newRealization;
 
     const dataToUpdate = {
-        bills: updatedBills.map(removeUndefinedProps), // Clean each bill object
+        bills: updatedBills.map(removeUndefinedProps),
         realization: newRealization,
         remainingValue: newRemainingValue,
         updatedAt: serverTimestamp(),
@@ -214,7 +210,7 @@ export function useContractContextData(): ContractContextType {
     const newRemainingValue = originalContract.value - newRealization;
     
     const dataToUpdate = {
-        bills: updatedBills.map(removeUndefinedProps), // Clean each bill object
+        bills: updatedBills.map(removeUndefinedProps),
         realization: newRealization,
         remainingValue: newRemainingValue,
         updatedAt: serverTimestamp(),
@@ -243,7 +239,7 @@ export function useContractContextData(): ContractContextType {
     const newRemainingValue = originalContract.value - newRealization;
 
      const dataToUpdate = {
-        bills: updatedBills, // Already cleaned as part of add/update
+        bills: updatedBills,
         realization: newRealization,
         remainingValue: newRemainingValue,
         updatedAt: serverTimestamp(),
@@ -290,5 +286,3 @@ export function ContractProvider({ children, value }: ContractProviderProps) {
     </ContractContext.Provider>
   );
 }
-
-    

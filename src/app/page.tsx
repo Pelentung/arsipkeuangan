@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import {
   getAuth,
   signInWithEmailAndPassword,
-  signInAnonymously,
   createUserWithEmailAndPassword,
   updateProfile
 } from 'firebase/auth';
@@ -21,7 +20,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useFirebaseApp, useUser } from '@/firebase';
-import { Separator } from '@/components/ui/separator';
 import { AppIcon } from '@/components/app/app-icon';
 
 function LoginForm() {
@@ -53,24 +51,6 @@ function LoginForm() {
     .finally(() => {
       setIsLoading(false);
     });
-  };
-
-  const handleAnonymousLogin = () => {
-    setIsLoading(true);
-    signInAnonymously(auth)
-      .then(() => {
-          router.push('/dashboard');
-      })
-      .catch((error) => {
-        toast({
-          title: 'Gagal Login Anonim',
-          description: 'Terjadi kesalahan saat mencoba masuk sebagai tamu.',
-          variant: 'destructive',
-        });
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
   };
 
   return (
@@ -113,20 +93,6 @@ function LoginForm() {
             disabled={isLoading}
           >
             {isLoading ? 'Memproses...' : 'Login'}
-          </Button>
-          <div className="relative w-full">
-            <Separator />
-            <span className="absolute left-1/2 -translate-x-1/2 top-[-10px] bg-card px-2 text-xs text-muted-foreground">
-              ATAU
-            </span>
-          </div>
-           <Button
-            className="w-full"
-            variant="secondary"
-            onClick={handleAnonymousLogin}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Memproses...' : 'Lanjutkan sebagai Tamu'}
           </Button>
         </CardFooter>
       </Card>

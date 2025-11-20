@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const navItems = [
-    { href: '/', label: 'Dasbor', icon: Home },
+    { href: '/', label: 'Data Kontrak', icon: Home },
     { href: '/laporan', label: 'Laporan', icon: ClipboardList },
 ]
 
@@ -40,7 +40,7 @@ export function AppSidebar() {
       <aside className="hidden md:flex flex-col w-64 border-r bg-card">
         <div className="flex items-center gap-2 h-16 border-b px-6">
           <AppIcon className="w-6 h-6 text-primary" />
-          <span className="font-semibold text-lg">Dasbor</span>
+          <span className="font-semibold text-lg">Data Kontrak</span>
         </div>
         <nav className="flex-1 p-4 flex flex-col justify-between">
           <div className="grid gap-1">
@@ -59,7 +59,7 @@ export function AppSidebar() {
           <SheetContent side="left" className="w-64 p-0 flex flex-col">
             <div className="flex items-center gap-2 h-16 border-b px-6">
                 <AppIcon className="w-6 h-6 text-primary" />
-                <span className="font-semibold text-lg">Dasbor</span>
+                <span className="font-semibold text-lg">Data Kontrak</span>
             </div>
             <nav className="grid gap-2 text-lg font-medium p-4">
                <NavLinks isMobile />
@@ -68,7 +68,7 @@ export function AppSidebar() {
         </Sheet>
         <div className="flex items-center gap-2 font-semibold">
            <AppIcon className="w-6 h-6 text-primary" />
-          <span className="font-semibold">Dasbor</span>
+          <span className="font-semibold">Data Kontrak</span>
         </div>
       </header>
     </>

@@ -1,13 +1,13 @@
 'use client';
 
-import type { Contract } from '@/lib/types';
 import { useMemo, useState } from 'react';
 import { Input } from '@/components/ui/input';
-import { ContractCard } from '@/components/app/contract-card';
 import { Skeleton } from '../ui/skeleton';
 import { Search } from 'lucide-react';
 import Link from 'next/link';
 import { useContractContext } from '@/contexts/contract-context';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import ContractTableRow from './contract-table-row';
 
 export function ContractView() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -49,10 +49,25 @@ export function ContractView() {
       </header>
 
       {filteredContracts.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredContracts.map((contract) => (
-            <ContractCard key={contract.id} contract={contract} />
-          ))}
+        <div className="rounded-lg border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className='w-[200px]'>Nomor Kontrak</TableHead>
+                <TableHead>Pelaksana</TableHead>
+                <TableHead>Uraian</TableHead>
+                <TableHead className="text-right">Nilai</TableHead>
+                <TableHead className="text-right">Realisasi</TableHead>
+                <TableHead className="text-right">Sisa</TableHead>
+                <TableHead className="text-center w-[150px]">Aksi</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredContracts.map((contract) => (
+                <ContractTableRow key={contract.id} contract={contract} />
+              ))}
+            </TableBody>
+          </Table>
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center text-center flex-1 rounded-lg border border-dashed shadow-sm py-12">
@@ -95,22 +110,18 @@ export function ContractViewSkeleton() {
           <Skeleton className="h-10 w-full max-w-sm" />
         </header>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="border bg-card text-card-foreground p-4 rounded-lg shadow">
-              <Skeleton className="h-6 w-3/4 mb-3" />
-              <Skeleton className="h-4 w-1/2 mb-4" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-5/6" />
-                <Skeleton className="h-4 w-full" />
-              </div>
-              <div className="mt-4 flex justify-between items-center">
-                <Skeleton className="h-4 w-1/3" />
-                 <Skeleton className="h-5 w-5" />
-              </div>
+        <div className="rounded-lg border">
+            <div className="p-4">
+                {[...Array(5)].map((_, i) => (
+                    <div key={i} className='flex items-center gap-4 py-2'>
+                        <Skeleton className="h-6 flex-1" />
+                        <Skeleton className="h-6 flex-1" />
+                        <Skeleton className="h-6 flex-1" />
+                        <Skeleton className="h-6 flex-1" />
+                        <Skeleton className="h-6 w-24" />
+                    </div>
+                ))}
             </div>
-          ))}
         </div>
       </div>
     );

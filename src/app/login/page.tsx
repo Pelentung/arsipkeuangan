@@ -5,10 +5,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth, useUser } from '@/firebase';
-import { initiateEmailSignIn, initiateEmailSignUp } from '@/firebase/non-blocking-login';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Separator } from '@/components/ui/separator';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getRedirectResult } from 'firebase/auth';
+
+
+const updateSession = async (token: string) => {
+  await fetch('/api/login', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -24,6 +35,16 @@ export default function LoginPage() {
     }
   }, [user, isUserLoading, router]);
 
+  useEffect(() => {
+    getRedirectResult(auth).then(async (result) => {
+      if (result?.user) {
+        const token = await result.user.getIdToken();
+        await updateSession(token);
+        router.push('/');
+      }
+    });
+  }, [auth, router]);
+
   const handleAuthAction = async (action: 'login' | 'signup') => {
     setError(null);
     if (!email || !password) {
@@ -32,15 +53,19 @@ export default function LoginPage() {
     }
 
     try {
-      if (action === 'login') {
-        await initiateEmailSignIn(auth, email, password);
-      } else {
-        await initiateEmailSignUp(auth, email, password);
-      }
-      // onAuthStateChanged akan menangani pengalihan saat berhasil
+      const userCredential = action === 'login'
+        ? await signInWithEmailAndPassword(auth, email, password)
+        : await createUserWithEmailAndPassword(auth, email, password);
+      
+      const token = await userCredential.user.getIdToken();
+      await updateSession(token);
+      router.push('/');
+      
     } catch (e: any) {
       switch (e.code) {
         case 'auth/invalid-credential':
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
           setError('Email atau kata sandi tidak valid. Silakan coba lagi.');
           break;
         case 'auth/email-already-in-use':
@@ -50,6 +75,7 @@ export default function LoginPage() {
           setError('Kata sandi terlalu lemah. Silakan pilih kata sandi yang lebih kuat.');
           break;
         default:
+          console.error(e);
           setError('Terjadi kesalahan tak terduga. Silakan coba lagi.');
           break;
       }

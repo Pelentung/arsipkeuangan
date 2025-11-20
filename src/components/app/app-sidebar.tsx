@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Home, LogOut, PanelLeft, BarChart2, ClipboardList } from 'lucide-react';
 import Link from 'next/link';
-import { useAuth } from '@/firebase';
-import { signOut } from 'firebase/auth';
 import { useRouter, usePathname } from 'next/navigation';
 
 const navItems = [
@@ -15,20 +13,17 @@ const navItems = [
     { href: '/statistik', label: 'Statistik', icon: BarChart2 },
 ]
 
+async function handleLogout() {
+    await fetch('/api/logout', {
+      method: 'POST',
+    });
+    window.location.href = '/login';
+  }
+
 export function AppSidebar() {
-  const auth = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      router.push('/login');
-    } catch (error) {
-      console.error('Gagal keluar:', error);
-      // Anda bisa menampilkan pesan error kepada pengguna di sini
-    }
-  };
 
   const NavLinks = ({ isMobile = false }: { isMobile?: boolean }) => (
     <>

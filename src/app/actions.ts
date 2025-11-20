@@ -2,8 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { getFirestoreAdmin } from '@/firebase/server-init';
-import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { getAuthedFirebase } from '@/firebase/server-init';
+import { addDoc, collection, doc, runTransaction, Timestamp } from 'firebase/firestore';
 
 const ContractFormSchema = z.object({
   contractNumber: z.string().min(1, 'Nomor kontrak wajib diisi.'),
@@ -84,28 +84,29 @@ export async function addContract(prevState: ContractState, formData: FormData):
     realization,
     remainingValue,
    } = validatedFields.data;
-  const { firestore } = getFirestoreAdmin();
 
-  const newContract: any = {
-    userId,
-    contractNumber,
-    contractDate: Timestamp.fromDate(new Date(contractDate)),
-    description,
-    implementer,
-    value,
-    realization,
-    remainingValue,
-    createdAt: FieldValue.serverTimestamp(),
-  };
-
-  if (addendumNumber) newContract.addendumNumber = addendumNumber;
-  if (addendumDate && addendumDate.length > 0) newContract.addendumDate = Timestamp.fromDate(new Date(addendumDate));
-
-  const contractsColRef = firestore.collection(`users/${userId}/contracts`);
-  
   try {
-    await contractsColRef.add(newContract);
-  } catch (error) {
+    const { firestore } = await getAuthedFirebase();
+    
+    const newContract: any = {
+        userId,
+        contractNumber,
+        contractDate: Timestamp.fromDate(new Date(contractDate)),
+        description,
+        implementer,
+        value,
+        realization,
+        remainingValue,
+        createdAt: Timestamp.now(),
+      };
+    
+      if (addendumNumber) newContract.addendumNumber = addendumNumber;
+      if (addendumDate && addendumDate.length > 0) newContract.addendumDate = Timestamp.fromDate(new Date(addendumDate));
+
+    const contractsColRef = collection(firestore, `users/${userId}/contracts`);
+    await addDoc(contractsColRef, newContract);
+
+  } catch (error: any) {
     console.error("Database Error:", error);
     return {
       errors: { server: ['Gagal menyimpan kontrak ke database.'] },
@@ -133,15 +134,16 @@ export async function addBill(prevState: BillState, formData: FormData): Promise
     };
   }
   
-  const { firestore } = getFirestoreAdmin();
   const { userId, contractId, amount, billDate, description } = validatedFields.data;
-  const contractRef = firestore.doc(`users/${userId}/contracts/${contractId}`);
-  const billsColRef = contractRef.collection('bills');
-
+  
   try {
-    await firestore.runTransaction(async (transaction) => {
+    const { firestore } = await getAuthedFirebase();
+    const contractRef = doc(firestore, `users/${userId}/contracts/${contractId}`);
+    const billsColRef = collection(contractRef, 'bills');
+
+    await runTransaction(firestore, async (transaction) => {
       const contractDoc = await transaction.get(contractRef);
-      if (!contractDoc.exists) {
+      if (!contractDoc.exists()) {
         throw new Error("Kontrak tidak ditemukan!");
       }
 
@@ -162,19 +164,20 @@ export async function addBill(prevState: BillState, formData: FormData): Promise
       });
 
       // Add the new bill
-      const newBillRef = billsColRef.doc();
+      const newBillRef = doc(billsColRef); // Create a new bill with an auto-generated ID
       transaction.set(newBillRef, {
         amount,
         billDate: Timestamp.fromDate(new Date(billDate)),
         description,
-        createdAt: FieldValue.serverTimestamp(),
+        createdAt: Timestamp.now(),
       });
     });
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error("Transaction Error:", error);
+    const errorMessage = error.message || 'Terjadi kesalahan saat menyimpan tagihan.';
     return {
-      errors: { server: ['Terjadi kesalahan saat menyimpan tagihan.'] },
-      message: 'Kesalahan Database: Gagal menambahkan tagihan.',
+      errors: { server: [errorMessage] },
+      message: `Kesalahan Database: ${errorMessage}`,
     };
   }
   

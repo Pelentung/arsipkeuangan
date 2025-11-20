@@ -1,20 +1,25 @@
 'use server';
 
-import { getFirestoreAdmin } from '@/firebase/server-init';
+import { getAuthedFirebase } from '@/firebase/server-init';
 import type { Contract } from './types';
-import type { Timestamp } from 'firebase-admin/firestore';
+import { collection, getDocs, orderBy, query, Timestamp } from 'firebase/firestore';
+
 
 export async function getContracts(userId: string): Promise<Contract[]> {
   if (!userId) {
     return [];
   }
   
-  const { firestore } = getFirestoreAdmin();
-  const contractsCol = firestore.collection(`users/${userId}/contracts`);
-  const q = contractsCol.orderBy('contractDate', 'desc');
-
   try {
-    const contractSnapshot = await q.get();
+    const { firestore } = await getAuthedFirebase();
+    const contractsColRef = collection(firestore, `users/${userId}/contracts`);
+    const q = query(contractsColRef, orderBy('contractDate', 'desc'));
+
+    const contractSnapshot = await getDocs(q);
+    if (contractSnapshot.empty) {
+      return [];
+    }
+
     const contractList = contractSnapshot.docs.map((doc) => {
       const data = doc.data();
       const contract: Contract = {
@@ -35,6 +40,8 @@ export async function getContracts(userId: string): Promise<Contract[]> {
     return contractList;
   } catch (error) {
     console.error(`Error fetching contracts for user ${userId}:`, error);
+    // In case of error (e.g., permissions), return an empty array
+    // to prevent the page from crashing.
     return [];
   }
 }

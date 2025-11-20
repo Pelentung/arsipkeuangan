@@ -6,7 +6,14 @@ import { Skeleton } from '../ui/skeleton';
 import { Search } from 'lucide-react';
 import Link from 'next/link';
 import { useContractContext } from '@/contexts/contract-context';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import ContractTableRow from './contract-table-row';
 
 export function ContractView() {
@@ -18,8 +25,12 @@ export function ContractView() {
     if (!searchTerm) return contracts;
     return contracts.filter(
       (contract) =>
-        contract.contractNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contract.implementer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.contractNumber
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        contract.implementer
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
         contract.description.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [contracts, searchTerm]);
@@ -45,7 +56,7 @@ export function ContractView() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-       </div>
+        </div>
       </header>
 
       {filteredContracts.length > 0 ? (
@@ -53,7 +64,7 @@ export function ContractView() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className='w-[200px]'>Nomor Kontrak</TableHead>
+                <TableHead className="w-[200px]">Nomor Kontrak</TableHead>
                 <TableHead>Pelaksana</TableHead>
                 <TableHead>Uraian</TableHead>
                 <TableHead className="text-right">Nilai</TableHead>
@@ -71,11 +82,17 @@ export function ContractView() {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center text-center flex-1 rounded-lg border border-dashed shadow-sm py-12">
-          <h3 className="text-2xl font-bold tracking-tight">Tidak ada data yang ditemukan</h3>
+          <h3 className="text-2xl font-bold tracking-tight">
+            Tidak ada data yang ditemukan
+          </h3>
           <p className="text-sm text-muted-foreground">
-            {searchTerm ? 'Coba kata kunci pencarian lain atau ' : 'Mulai dengan '}
+            {searchTerm
+              ? 'Coba kata kunci pencarian lain atau '
+              : 'Mulai dengan '}
             <Link href="/tambah-kontrak">
-                <span className="text-primary hover:underline cursor-pointer">menambahkan data baru</span>
+              <span className="text-primary hover:underline cursor-pointer">
+                menambahkan data baru
+              </span>
             </Link>
             .
           </p>
@@ -86,43 +103,45 @@ export function ContractView() {
 }
 
 export function ContractViewSkeleton() {
-    return (
-      <div className="flex flex-col h-full">
-        {/* Dashboard Skeleton */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-            <div>
-                <Skeleton className="h-8 w-48 mb-2" />
-                <Skeleton className="h-4 w-72" />
-            </div>
-            <Skeleton className="h-10 w-36" />
+  return (
+    <div className="flex flex-col h-full">
+      {/* Dashboard Skeleton */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-72" />
         </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-            {[...Array(4)].map((_,i) => <Skeleton key={i} className="h-28" />)}
-        </div>
-        <Skeleton className="h-80 w-full mb-8" />
-        
-        {/* Contract List Skeleton */}
-        <header className="flex items-center justify-between mb-6">
-          <div>
-            <Skeleton className="h-7 w-40 mb-2" />
-            <Skeleton className="h-4 w-64" />
-          </div>
-          <Skeleton className="h-10 w-full max-w-sm" />
-        </header>
+        <Skeleton className="h-10 w-36" />
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+        {[...Array(4)].map((_, i) => (
+          <Skeleton key={i} className="h-28" />
+        ))}
+      </div>
+      <Skeleton className="h-80 w-full mb-8" />
 
-        <div className="rounded-lg border">
-            <div className="p-4">
-                {[...Array(5)].map((_, i) => (
-                    <div key={i} className='flex items-center gap-4 py-2'>
-                        <Skeleton className="h-6 flex-1" />
-                        <Skeleton className="h-6 flex-1" />
-                        <Skeleton className="h-6 flex-1" />
-                        <Skeleton className="h-6 flex-1" />
-                        <Skeleton className="h-6 w-24" />
-                    </div>
-                ))}
+      {/* Contract List Skeleton */}
+      <header className="flex items-center justify-between mb-6">
+        <div>
+          <Skeleton className="h-7 w-40 mb-2" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <Skeleton className="h-10 w-full max-w-sm" />
+      </header>
+
+      <div className="rounded-lg border">
+        <div className="p-4">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex items-center gap-4 py-2">
+              <Skeleton className="h-6 flex-1" />
+              <Skeleton className="h-6 flex-1" />
+              <Skeleton className="h-6 flex-1" />
+              <Skeleton className="h-6 flex-1" />
+              <Skeleton className="h-6 w-24" />
             </div>
+          ))}
         </div>
       </div>
-    );
+    </div>
+  );
 }

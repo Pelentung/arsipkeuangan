@@ -1,26 +1,14 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
-import { AppLayout } from '@/components/app/app-layout';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
-import { usePathname } from 'next/navigation';
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { ConditionalLayout } from '@/components/app/conditional-layout';
 
 export const metadata: Metadata = {
   title: 'Gudang Kontrak',
   description: 'Simpan dan kelola kontrak Anda dengan aman.',
 };
-
-function ConditionalAppLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const isAuthPage = pathname === '/';
-
-  if (isAuthPage) {
-    return <>{children}</>;
-  }
-
-  return <AppLayout>{children}</AppLayout>;
-}
 
 export default function RootLayout({
   children,
@@ -39,9 +27,9 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <FirebaseClientProvider>
-          <ConditionalAppLayout>
+          <ConditionalLayout>
             {children}
-          </ConditionalAppLayout>
+          </ConditionalLayout>
         </FirebaseClientProvider>
         <Toaster />
         <SpeedInsights/>

@@ -103,7 +103,7 @@ export function useCollection<T = any>(
     );
 
     return () => unsubscribe();
-  }, [memoizedTargetRefOrQuery, options]);
+  }, [memoizedTargetRefOrQuery, JSON.stringify(options)]);
 
   return { data, isLoading, error };
 }

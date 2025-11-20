@@ -49,13 +49,15 @@ function fromTimestamp(timestamp: Timestamp | Date | string): string {
     if (timestamp instanceof Timestamp) {
         date = timestamp.toDate();
     } else if (typeof timestamp === 'string') {
+        // Attempt to parse string. Handles ISO strings and other formats.
         date = new Date(timestamp);
     } else {
+        // Assumes it's already a Date object
         date = timestamp;
     }
     // Check if the date is valid before calling toISOString
     if (isNaN(date.getTime())) {
-        return '';
+        return ''; // Or handle invalid date strings as you see fit
     }
     return date.toISOString();
 }

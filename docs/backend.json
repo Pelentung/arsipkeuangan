@@ -4,117 +4,117 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Contract",
       "type": "object",
-      "description": "Represents a contract document and its associated financial data.",
-      "properties": {
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. The user ID 'OTgGW8wLTLc569p70e2ARngMN1y1' will be the value."
-        },
-        "contractNumber": {
-          "type": "string",
-          "description": "The contract number."
-        },
-        "contractDate": {
-          "type": "string",
-          "description": "The date of the contract.",
-          "format": "date"
-        },
-        "addendumNumber": {
-          "type": "string",
-          "description": "The addendum contract number, if any."
-        },
-        "addendumDate": {
-          "type": "string",
-          "description": "The date of the addendum contract, if any.",
-          "format": "date"
-        },
-        "description": {
-          "type": "string",
-          "description": "A description of the contract's scope."
-        },
-        "implementer": {
-          "type": "string",
-          "description": "The party responsible for implementing the contract."
-        },
-        "value": {
-          "type": "number",
-          "description": "The total value of the contract."
-        },
-        "realization": {
-          "type": "number",
-          "description": "The amount of the contract that has been realized."
-        },
-        "remainingValue": {
-          "type": "number",
-          "description": "The remaining value of the contract (value - realization)."
-        }
-      },
-      "required": [
-        "userId",
-        "contractNumber",
-        "contractDate",
-        "description",
-        "implementer",
-        "value",
-        "realization",
-        "remainingValue"
-      ]
-    },
-    "Bill": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Bill",
-      "type": "object",
-      "description": "Represents a single bill or invoice against a contract.",
-      "properties": {
-        "billDate": {
-          "type": "string",
-          "description": "The date the bill was issued.",
-          "format": "date"
-        },
-        "amount": {
-          "type": "number",
-          "description": "The amount of the bill."
-        },
-        "description": {
-          "type": "string",
-          "description": "A short description for the bill."
-        }
-      },
-      "required": [
-        "billDate",
-        "amount",
-        "description"
-      ]
-    },
-    "User": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "User",
-      "type": "object",
-      "description": "Represents a user of the application.",
+      "description": "Represents a contract document and its associated metadata.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the user entity. This will match the Firebase UID."
+          "description": "Unique identifier for the Contract entity."
         },
-        "email": {
+        "title": {
           "type": "string",
-          "description": "The email address of the user.",
-          "format": "email"
+          "description": "Title of the contract."
         },
-        "firstName": {
-          "type": "string",
-          "description": "The first name of the user."
+        "parties": {
+          "type": "array",
+          "description": "The parties involved in the contract. (Relationship: Contract 1:N Party)",
+          "items": {
+            "type": "string"
+          }
         },
-        "lastName": {
+        "effectiveDate": {
           "type": "string",
-          "description": "The last name of the user."
+          "description": "The date the contract becomes effective.",
+          "format": "date-time"
+        },
+        "expirationDate": {
+          "type": "string",
+          "description": "The date the contract expires.",
+          "format": "date-time"
+        },
+        "terms": {
+          "type": "string",
+          "description": "Key terms and conditions of the contract."
+        },
+        "documentUrl": {
+          "type": "string",
+          "description": "URL or path to the contract document stored in Firebase Storage.",
+          "format": "uri"
+        },
+        "summary": {
+          "type": "string",
+          "description": "AI-generated summary of the contract terms."
+        },
+        "reminderIds": {
+          "type": "array",
+          "description": "References to Reminders associated with this contract. (Relationship: Contract 1:N Reminder)",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [
         "id",
-        "email",
-        "firstName",
-        "lastName"
+        "title",
+        "parties",
+        "effectiveDate",
+        "expirationDate",
+        "terms",
+        "documentUrl"
+      ]
+    },
+    "Reminder": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Reminder",
+      "type": "object",
+      "description": "Represents a reminder for important dates related to a contract.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Reminder entity."
+        },
+        "contractId": {
+          "type": "string",
+          "description": "Reference to the Contract this reminder is for. (Relationship: Contract 1:N Reminder)"
+        },
+        "reminderDate": {
+          "type": "string",
+          "description": "The date and time the reminder should be triggered.",
+          "format": "date-time"
+        },
+        "message": {
+          "type": "string",
+          "description": "The message to be displayed when the reminder is triggered."
+        }
+      },
+      "required": [
+        "id",
+        "contractId",
+        "reminderDate",
+        "message"
+      ]
+    },
+    "Party": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Party",
+      "type": "object",
+      "description": "Represents a party involved in a contract.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Party entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the party."
+        },
+        "contactInformation": {
+          "type": "string",
+          "description": "Contact details for the party, such as address, phone number, or email."
+        }
+      },
+      "required": [
+        "id",
+        "name"
       ]
     }
   },
@@ -127,66 +127,66 @@
   "firestore": {
     "structure": [
       {
-        "path": "/users/{userId}",
-        "definition": {
-          "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Stores user profiles.  Authorization is based on path-based ownership (only the user or admins can access).",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The Firebase UID of the user."
-            }
-          ]
-        }
-      },
-      {
         "path": "/users/{userId}/contracts/{contractId}",
         "definition": {
           "entityName": "Contract",
           "schema": {
             "$ref": "#/backend/entities/Contract"
           },
-          "description": "Stores contracts owned by a specific user. Authorization is based on path-based ownership, enabling secure `list` operations (QAPs).",
+          "description": "Stores contract documents owned by a specific user. Ensures that each user can only access their own contracts. Path-based ownership ensures secure `list` operations. Authorization relies solely on `request.auth.uid` matching the `userId`.",
           "params": [
             {
               "name": "userId",
-              "description": "The Firebase UID of the user who owns the contract. It will be 'OTgGW8wLTLc569p70e2ARngMN1y1' when requested."
+              "description": "The unique identifier of the user who owns the contract."
             },
             {
               "name": "contractId",
-              "description": "The unique ID of the contract document."
+              "description": "The unique identifier of the contract document."
             }
           ]
         }
       },
       {
-        "path": "/users/{userId}/contracts/{contractId}/bills/{billId}",
+        "path": "/users/{userId}/contracts/{contractId}/reminders/{reminderId}",
         "definition": {
-            "entityName": "Bill",
-            "schema": {
-                "$ref": "#/backend/entities/Bill"
+          "entityName": "Reminder",
+          "schema": {
+            "$ref": "#/backend/entities/Reminder"
+          },
+          "description": "Stores reminders associated with a specific contract.  Since this is a subcollection owned by a contract and user, authorization is determined by the parent `contractId` and `userId` relationship.  Path-based ownership ensures that only the contract owner can access the reminders.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns the contract."
             },
-            "description": "Stores individual bills for a specific contract. Authorization is inherited from the parent contract.",
-            "params": [
-                {
-                    "name": "userId",
-                    "description": "The Firebase UID of the user who owns the contract."
-                },
-                {
-                    "name": "contractId",
-                    "description": "The unique ID of the contract document."
-                },
-                {
-                    "name": "billId",
-                    "description": "The unique ID of the bill document."
-                }
-            ]
+            {
+              "name": "contractId",
+              "description": "The unique identifier of the contract document."
+            },
+            {
+              "name": "reminderId",
+              "description": "The unique identifier of the reminder document."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/parties/{partyId}",
+        "definition": {
+          "entityName": "Party",
+          "schema": {
+            "$ref": "#/backend/entities/Party"
+          },
+          "description": "Stores information about parties involved in contracts. Parties are global and any user can read any parties.",
+          "params": [
+            {
+              "name": "partyId",
+              "description": "The unique identifier of the party."
+            }
+          ]
         }
       }
     ],
-    "reasoning": "The Firestore structure is designed to ensure secure and efficient management of user contracts. It leverages path-based ownership for private user data, and denormalization to maintain authorization independence. This approach avoids using `get()` calls in security rules, enabling atomic operations and simplifies debugging. The structure also facilitates secure listing operations.\n\nSpecifically:\n\n*   `/users/{userId}`: Stores user profiles. This collection provides a central location for user information and utilizes path-based ownership ensuring only the user (or admins) can access their profile data.\n*   `/users/{userId}/contracts/{contractId}`: Stores contracts owned by a specific user. The `userId` in the path enforces ownership.  No denormalization is needed here as authorization is directly tied to the path.  This enables QAPs because listing contracts is restricted to the contracts of a specific user.\n*   `/users/{userId}/contracts/{contractId}/bills/{billId}`: Stores individual bills related to a contract as a subcollection. This creates a strong hierarchical relationship and ensures bills are queried within the context of a contract."
+    "reasoning": "The Firestore data structure is designed to securely store contract data and related metadata. It prioritizes authorization independence by denormalizing user roles and access control information where necessary, avoiding complex `get()` calls in security rules. The structure also supports query optimization and efficient data retrieval. The path-based ownership `/users/{userId}/contracts/{contractId}` structure enables secure `list` operations by ensuring that users can only list contracts they own. Denormalizing ownership into subcollections is avoided for simplicity in this scenario.  The segregation of Contract, Reminder, and Party data into separate collections facilitates focused queries and simplifies security rules by ensuring a homogenous security posture within each collection. Specifically, access to Contracts and Parties are limited to authorized users via path-based ownership and role-based access. The structure also facilitates easy filtering and searching of contracts based on metadata fields such as parties, effective date, and expiration date. Reminders are structured as subcollections under contracts to ensure proper scoping and ownership. The structure facilitates QAPs by leveraging path-based ownership."
   }
 }

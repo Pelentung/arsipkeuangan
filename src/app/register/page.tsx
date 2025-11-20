@@ -2,8 +2,8 @@
 import { useState } from 'react';
 import {
   getAuth,
-  signInWithEmailAndPassword,
-  signInAnonymously,
+  createUserWithEmailAndPassword,
+  updateProfile,
 } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -19,56 +19,58 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useFirebaseApp } from '@/firebase';
-import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const firebaseApp = useFirebaseApp();
   const auth = getAuth(firebaseApp);
   const router = useRouter();
   const { toast } = useToast();
 
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // This should not be async. The redirect is handled by the useUser hook
-  // which listens for auth state changes.
-  const handleLogin = () => {
-    setIsLoading(true);
-    signInWithEmailAndPassword(auth, email, password)
-    .then(() => {
-        // The redirect is handled by the useUser hook in the layout
-        router.push('/');
-    })
-    .catch((error: any) => {
+  const handleRegister = () => {
+    if (!name) {
       toast({
-        title: 'Gagal Login',
-        description:
-          error.code === 'auth/invalid-credential'
-            ? 'Email atau kata sandi salah.'
-            : 'Terjadi kesalahan saat mencoba masuk.',
+        title: 'Gagal Registrasi',
+        description: 'Nama tidak boleh kosong.',
         variant: 'destructive',
       });
-    })
-    .finally(() => {
-      setIsLoading(false);
-    });
-  };
+      return;
+    }
 
-  // This should not be async. The redirect is handled by the useUser hook
-  // which listens for auth state changes.
-  const handleAnonymousLogin = () => {
     setIsLoading(true);
-    signInAnonymously(auth)
-      .then(() => {
-          // The redirect is handled by the useUser hook in the layout
-          router.push('/');
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // After creating the user, update their profile with the name
+        const user = userCredential.user;
+        return updateProfile(user, {
+          displayName: name,
+        });
       })
-      .catch((error) => {
+      .then(() => {
+        // Redirect to home page after successful registration and profile update
+        router.push('/');
+      })
+      .catch((error: any) => {
+        let description = 'Terjadi kesalahan saat mencoba mendaftar.';
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            description = 'Email ini sudah digunakan oleh akun lain.';
+            break;
+          case 'auth/weak-password':
+            description = 'Kata sandi terlalu lemah. Minimal 6 karakter.';
+            break;
+          case 'auth/invalid-email':
+            description = 'Format email tidak valid.';
+            break;
+        }
         toast({
-          title: 'Gagal Login Anonim',
-          description: 'Terjadi kesalahan saat mencoba masuk sebagai tamu.',
+          title: 'Gagal Registrasi',
+          description,
           variant: 'destructive',
         });
       })
@@ -81,12 +83,24 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-2xl">Daftar Akun Baru</CardTitle>
           <CardDescription>
-            Masukkan email dan kata sandi Anda untuk melanjutkan.
+            Isi form di bawah ini untuk membuat akun Anda.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
+           <div className="grid gap-2">
+            <Label htmlFor="name">Nama</Label>
+            <Input
+              id="name"
+              type="text"
+              placeholder="Nama Lengkap Anda"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -114,29 +128,15 @@ export default function LoginPage() {
         <CardFooter className="flex flex-col gap-4">
           <Button
             className="w-full"
-            onClick={handleLogin}
+            onClick={handleRegister}
             disabled={isLoading}
           >
-            {isLoading ? 'Memproses...' : 'Login'}
+            {isLoading ? 'Memproses...' : 'Daftar'}
           </Button>
-          <div className="relative w-full">
-            <Separator />
-            <span className="absolute left-1/2 -translate-x-1/2 top-[-10px] bg-card px-2 text-xs text-muted-foreground">
-              ATAU
-            </span>
-          </div>
-           <Button
-            className="w-full"
-            variant="secondary"
-            onClick={handleAnonymousLogin}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Memproses...' : 'Lanjutkan sebagai Tamu'}
-          </Button>
-           <p className="text-center text-sm text-muted-foreground mt-2">
-              Belum punya akun?{' '}
-              <Link href="/register" className="underline text-primary">
-                Daftar
+          <p className="text-center text-sm text-muted-foreground mt-2">
+              Sudah punya akun?{' '}
+              <Link href="/login" className="underline text-primary">
+                Login
               </Link>
             </p>
         </CardFooter>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Legend } from 'recharts';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import {
   ChartContainer,
   ChartTooltip,
@@ -10,7 +10,6 @@ import { ChartConfig } from '@/components/ui/chart';
 
 interface ChartData {
     month: string;
-    nilai: number;
     realisasi: number;
 }
 
@@ -19,10 +18,6 @@ interface ContractStatusChartProps {
 }
 
 const chartConfig = {
-  nilai: {
-    label: 'Nilai',
-    color: 'hsl(var(--chart-2))',
-  },
   realisasi: {
     label: 'Realisasi',
     color: 'hsl(var(--chart-1))',
@@ -54,11 +49,9 @@ export function ContractStatusChart({ data }: ContractStatusChartProps) {
             tickFormatter={(value) => new Intl.NumberFormat('id-ID', { notation: 'compact', compactDisplay: 'short' }).format(value as number)}
            />
           <ChartTooltip
-            content={<ChartTooltipContent formatter={(value, name) => `${name}: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value as number)}`} />}
+            content={<ChartTooltipContent formatter={(value) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value as number)} />}
             cursor={false}
           />
-          <Legend />
-          <Bar dataKey="nilai" fill="var(--color-nilai)" radius={4} />
           <Bar dataKey="realisasi" fill="var(--color-realisasi)" radius={4} />
         </BarChart>
       </ResponsiveContainer>

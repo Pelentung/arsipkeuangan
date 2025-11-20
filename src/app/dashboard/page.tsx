@@ -41,7 +41,7 @@ function Dashboard() {
   const chartData = useMemo(() => {
      if (loading || !contracts) return [];
      const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
-     const monthlyData: { [key: string]: { nilai: number, realisasi: number } } = {};
+     const monthlyData: { [key: string]: { realisasi: number } } = {};
 
      contracts.forEach(contract => {
         const contractDate = new Date(contract.contractDate);
@@ -51,10 +51,9 @@ function Dashboard() {
         const key = `${monthNames[month]} ${year}`;
 
         if (!monthlyData[key]) {
-            monthlyData[key] = { nilai: 0, realisasi: 0 };
+            monthlyData[key] = { realisasi: 0 };
         }
         
-        monthlyData[key].nilai += contract.value;
         monthlyData[key].realisasi += contract.realization;
      });
 

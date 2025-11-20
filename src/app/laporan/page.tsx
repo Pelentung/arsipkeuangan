@@ -73,7 +73,7 @@ export default function LaporanPage() {
             }
             return contract.bills.map(bill => [
                 escapeCsvCell(contract.contractNumber),
-                escapeCsvCell(contract.contractDate),
+                escapeCsv-Cell(contract.contractDate),
                 escapeCsvCell(contract.implementer),
                 escapeCsvCell(contract.description),
                 escapeCsvCell(contract.value),
@@ -108,7 +108,7 @@ export default function LaporanPage() {
     };
 
     if (isUserLoading || !user) {
-        return <p>Memuat...</p>;
+        return <p>Mengalihkan...</p>;
     }
     
     return (

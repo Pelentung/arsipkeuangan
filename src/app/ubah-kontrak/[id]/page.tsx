@@ -23,7 +23,7 @@ export default function UbahKontrakPage() {
 
   useEffect(() => {
     if (!isUserLoading && !user) {
-      router.replace('/');
+      router.push('/');
     }
   }, [user, isUserLoading, router]);
 
@@ -33,11 +33,8 @@ export default function UbahKontrakPage() {
     const foundContract = getContractById(contractId);
 
     if (foundContract) {
-      // The security check is now implicitly handled by the context which only fetches user's own contracts.
-      // So no need to check foundContract.userId === user.uid
       setContract(foundContract);
     } else {
-      // If contract not found in the context, it means it doesn't exist or doesn't belong to the user
       router.push('/dashboard');
     }
   }, [id, getContractById, contractsLoading, router, user, isUserLoading]);

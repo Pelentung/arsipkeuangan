@@ -12,12 +12,12 @@ export default function TambahKontrakPage() {
 
     useEffect(() => {
         if (!isUserLoading && !user) {
-            router.replace('/');
+            router.push('/');
         }
     }, [user, isUserLoading, router]);
 
     if (isUserLoading || !user) {
-        return <p>Memuat...</p>
+        return <p>Mengalihkan...</p>
     }
 
     return (

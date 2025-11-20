@@ -15,10 +15,17 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import ContractTableRow from './contract-table-row';
+import { Collapsible, CollapsibleContent } from '../ui/collapsible';
+import BillTableRow from './bill-table-row';
 
 export function ContractView() {
   const [searchTerm, setSearchTerm] = useState('');
   const { contracts, loading } = useContractContext();
+  const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
+
+  const toggleRow = (id: string) => {
+    setOpenStates((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const filteredContracts = useMemo(() => {
     if (!contracts) return [];
@@ -75,7 +82,63 @@ export function ContractView() {
             </TableHeader>
             <TableBody>
               {filteredContracts.map((contract) => (
-                <ContractTableRow key={contract.id} contract={contract} />
+                <Collapsible
+                  key={contract.id}
+                  asChild
+                  open={openStates[contract.id] || false}
+                  onOpenChange={() => toggleRow(contract.id)}
+                >
+                  <>
+                    <ContractTableRow
+                      contract={contract}
+                      isOpen={openStates[contract.id] || false}
+                    />
+                    <CollapsibleContent asChild>
+                      <TableRow>
+                        <TableCell colSpan={7} className="p-0">
+                          <div className="p-4 bg-muted/50">
+                            <h4 className="font-semibold mb-2">
+                              Detail Tagihan
+                            </h4>
+                            {contract.bills && contract.bills.length > 0 ? (
+                              <div className="rounded-md border bg-card">
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead>No. SPM</TableHead>
+                                      <TableHead>No. SP2D</TableHead>
+                                      <TableHead>Uraian</TableHead>
+                                      <TableHead>Status</TableHead>
+                                      <TableHead className="text-right">
+                                        Jumlah
+                                      </TableHead>
+                                      <TableHead className="text-center w-[120px]">
+                                        Aksi
+                                      </TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {contract.bills.map((bill) => (
+                                      <BillTableRow
+                                        key={bill.id}
+                                        bill={bill}
+                                        contractId={contract.id}
+                                      />
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </div>
+                            ) : (
+                              <p className="text-sm text-muted-foreground text-center py-4">
+                                Belum ada tagihan untuk kontrak ini.
+                              </p>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    </CollapsibleContent>
+                  </>
+                </Collapsible>
               ))}
             </TableBody>
           </Table>

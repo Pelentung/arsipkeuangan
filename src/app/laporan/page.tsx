@@ -25,7 +25,10 @@ export default function LaporanPage() {
             return '';
         }
         const cellString = String(cell);
-        if (cellString.includes(',') || cellString.includes('"') || cellString.includes('\n')) {
+        // Although we are using semicolon as a separator, we still escape commas
+        // as they can be present in the data. The main check is for the separator itself.
+        if (cellString.includes(';') || cellString.includes('"') || cellString.includes('\n')) {
+            // Enclose in double quotes and escape existing double quotes by doubling them
             return `"${cellString.replace(/"/g, '""')}"`;
         }
         return cellString;
@@ -90,8 +93,8 @@ export default function LaporanPage() {
         });
 
         const csvContent = [
-            headers.join(','),
-            ...rows.map(row => row.join(','))
+            headers.join(';'),
+            ...rows.map(row => row.join(';'))
         ].join('\n');
 
         const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });

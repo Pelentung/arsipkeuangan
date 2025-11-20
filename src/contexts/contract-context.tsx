@@ -69,7 +69,7 @@ export function useContractContextData(): ContractContextType {
     newContractData: Omit<Contract, 'id' | 'realization' | 'remainingValue' | 'bills'>
   ) => {
     setContracts((prevContracts) => {
-      const realization = newContractData.realization || 0;
+      const realization = 0; // Fix: Realization should start at 0
       const newContract: Contract = {
         ...newContractData,
         id: new Date().toISOString(), // Simple unique ID
@@ -89,7 +89,8 @@ export function useContractContextData(): ContractContextType {
       prevContracts.map((contract) => {
         if (contract.id === contractId) {
           const newContractData = { ...contract, ...updatedData };
-          const realization = newContractData.realization;
+          // Realization is calculated from bills, so we don't need to get it from updatedData
+          const realization = newContractData.bills.reduce((sum, b) => sum + b.amount, 0);
           const remainingValue = newContractData.value - realization;
           return {
             ...newContractData,
@@ -134,7 +135,7 @@ export function useContractContextData(): ContractContextType {
       prevContracts.map(contract => {
         if (contract.id === contractId) {
           const updatedBills = contract.bills.map(bill => 
-            bill.id === billId ? { ...bill, ...updatedBillData } : bill
+            bill.id === billId ? { id: bill.id, ...updatedBillData } : bill // Fix: Retain the bill id
           );
           const newRealization = updatedBills.reduce((sum, b) => sum + b.amount, 0);
           const newRemainingValue = contract.value - newRealization;

@@ -12,7 +12,7 @@ import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
 const navItems = [
-    { href: '/', label: 'Data Kontrak', icon: Home },
+    { href: '/dashboard', label: 'Data Kontrak', icon: Home },
     { href: '/laporan', label: 'Laporan', icon: ClipboardList },
 ]
 
@@ -25,7 +25,7 @@ export function AppSidebar() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      router.push('/login');
+      router.push('/');
     } catch (error) {
       console.error('Logout failed:', error);
     }

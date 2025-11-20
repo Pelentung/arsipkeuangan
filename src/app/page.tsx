@@ -1,144 +1,275 @@
 'use client';
-
-import { ContractView } from '@/components/app/contract-view';
-import { Suspense, useMemo, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Coins, Receipt, Wallet, PlusCircle } from 'lucide-react';
-import { ContractStatusChart } from '@/components/app/contract-status-chart';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { useContractContext } from '@/contexts/contract-context';
-import { useUser } from '@/firebase';
+import { useState } from 'react';
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  signInAnonymously,
+  createUserWithEmailAndPassword,
+  updateProfile
+} from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { useFirebaseApp } from '@/firebase';
+import { Separator } from '@/components/ui/separator';
+import { AppIcon } from '@/components/app/app-icon';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-function Dashboard() {
-  const { contracts, loading } = useContractContext();
-  const { user, isUserLoading } = useUser();
+
+function LoginForm() {
+  const firebaseApp = useFirebaseApp();
+  const auth = getAuth(firebaseApp);
   const router = useRouter();
+  const { toast } = useToast();
 
-  useEffect(() => {
-    if (!isUserLoading && !user) {
-      router.push('/login');
-    }
-  }, [user, isUserLoading, router]);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const summary = useMemo(() => {
-    if (loading || !contracts) {
-      return { total: 0, totalValue: 0, totalRealization: 0, totalRemaining: 0 };
-    }
-    const total = contracts.length;
-    const totalValue = contracts.reduce((sum, c) => sum + c.value, 0);
-    const totalRealization = contracts.reduce((sum, c) => sum + c.realization, 0);
-    const totalRemaining = totalValue - totalRealization;
-
-    return { total, totalValue, totalRealization, totalRemaining };
-  }, [contracts, loading]);
-
-  const formatCurrency = (num: number) => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+  const handleLogin = () => {
+    setIsLoading(true);
+    signInWithEmailAndPassword(auth, email, password)
+    .then(() => {
+        router.push('/dashboard');
+    })
+    .catch((error: any) => {
+      toast({
+        title: 'Gagal Login',
+        description:
+          error.code === 'auth/invalid-credential'
+            ? 'Email atau kata sandi salah.'
+            : 'Terjadi kesalahan saat mencoba masuk.',
+        variant: 'destructive',
+      });
+    })
+    .finally(() => {
+      setIsLoading(false);
+    });
   };
-  
-  const chartData = useMemo(() => {
-     if (loading || !contracts) return [];
-     const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
-     const monthlyData: { [key: string]: { nilai: number, realisasi: number } } = {};
 
-     contracts.forEach(contract => {
-        const contractDate = new Date(contract.contractDate);
-        if (isNaN(contractDate.getTime())) return;
-        const month = contractDate.getMonth();
-        const year = contractDate.getFullYear();
-        const key = `${monthNames[month]} ${year}`;
-
-        if (!monthlyData[key]) {
-            monthlyData[key] = { nilai: 0, realisasi: 0 };
-        }
-        
-        monthlyData[key].nilai += contract.value;
-        monthlyData[key].realisasi += contract.realization;
-     });
-
-    return Object.entries(monthlyData).map(([month, data]) => ({ month, ...data }));
-  }, [contracts, loading]);
-
-  if (isUserLoading || !user) {
-    return <p>Mengalihkan ke halaman login...</p>;
-  }
+  const handleAnonymousLogin = () => {
+    setIsLoading(true);
+    signInAnonymously(auth)
+      .then(() => {
+          router.push('/dashboard');
+      })
+      .catch((error) => {
+        toast({
+          title: 'Gagal Login Anonim',
+          description: 'Terjadi kesalahan saat mencoba masuk sebagai tamu.',
+          variant: 'destructive',
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
 
   return (
-    <>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <div>
-            <h1 className="text-2xl font-bold tracking-tight">Data Kontrak</h1>
-            <p className="text-muted-foreground">
-                Selamat datang, {user?.displayName || 'Pengguna'}! Berikut adalah ringkasan data keuangan Anda.
-            </p>
-        </div>
-        <Link href="/tambah-kontrak" passHref>
-            <Button>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Tambah Data
-            </Button>
-        </Link>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Kontrak</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{summary.total}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Nilai</CardTitle>
-            <Coins className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(summary.totalValue)}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Realisasi</CardTitle>
-            <Receipt className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(summary.totalRealization)}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Sisa</CardTitle>
-            <Wallet className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(summary.totalRemaining)}</div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <Card className='mb-8'>
-        <CardHeader>
-          <CardTitle>Realisasi Data Keuangan per Bulan</CardTitle>
+    <Card className="border-0 shadow-none">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">Selamat Datang Kembali!</CardTitle>
+          <CardDescription>
+            Masukkan email dan kata sandi Anda untuk melanjutkan.
+          </CardDescription>
         </CardHeader>
-        <CardContent className="pl-2">
-            <ContractStatusChart data={chartData} />
+        <CardContent className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="nama@email.com"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="password">Kata Sandi</Label>
+            <Input
+              id="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
         </CardContent>
+        <CardFooter className="flex flex-col gap-4">
+          <Button
+            className="w-full"
+            onClick={handleLogin}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Memproses...' : 'Login'}
+          </Button>
+          <div className="relative w-full">
+            <Separator />
+            <span className="absolute left-1/2 -translate-x-1/2 top-[-10px] bg-card px-2 text-xs text-muted-foreground">
+              ATAU
+            </span>
+          </div>
+           <Button
+            className="w-full"
+            variant="secondary"
+            onClick={handleAnonymousLogin}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Memproses...' : 'Lanjutkan sebagai Tamu'}
+          </Button>
+        </CardFooter>
       </Card>
-
-      <ContractView />
-    </>
-  );
+  )
 }
 
-export default function Home() {
+
+function RegisterForm() {
+  const firebaseApp = useFirebaseApp();
+  const auth = getAuth(firebaseApp);
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleRegister = () => {
+    if (!name) {
+      toast({
+        title: 'Gagal Registrasi',
+        description: 'Nama tidak boleh kosong.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        return updateProfile(user, {
+          displayName: name,
+        });
+      })
+      .then(() => {
+        router.push('/dashboard');
+      })
+      .catch((error: any) => {
+        let description = 'Terjadi kesalahan saat mencoba mendaftar.';
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            description = 'Email ini sudah digunakan oleh akun lain.';
+            break;
+          case 'auth/weak-password':
+            description = 'Kata sandi terlalu lemah. Minimal 6 karakter.';
+            break;
+          case 'auth/invalid-email':
+            description = 'Format email tidak valid.';
+            break;
+        }
+        toast({
+          title: 'Gagal Registrasi',
+          description,
+          variant: 'destructive',
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
   return (
-      <Suspense fallback={<p>Memuat...</p>}>
-        <Dashboard />
-      </Suspense>
+     <Card className="border-0 shadow-none">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">Buat Akun Baru</CardTitle>
+          <CardDescription>
+            Isi form di bawah ini untuk membuat akun Anda.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+           <div className="grid gap-2">
+            <Label htmlFor="register-name">Nama</Label>
+            <Input
+              id="register-name"
+              type="text"
+              placeholder="Nama Lengkap Anda"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="register-email">Email</Label>
+            <Input
+              id="register-email"
+              type="email"
+              placeholder="nama@email.com"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="register-password">Kata Sandi</Label>
+            <Input
+              id="register-password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
+        </CardContent>
+        <CardFooter className="flex flex-col gap-4">
+          <Button
+            className="w-full"
+            onClick={handleRegister}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Memproses...' : 'Daftar'}
+          </Button>
+        </CardFooter>
+      </Card>
+  )
+}
+
+
+export default function WelcomePage() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
+      <div className="flex items-center gap-3 mb-6">
+        <AppIcon className="w-8 h-8 text-primary" />
+        <h1 className="text-2xl font-bold">Gudang Kontrak</h1>
+      </div>
+      <Tabs defaultValue="login" className="w-full max-w-sm">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="login">Login</TabsTrigger>
+          <TabsTrigger value="register">Daftar</TabsTrigger>
+        </TabsList>
+        <TabsContent value="login">
+          <LoginForm />
+        </TabsContent>
+        <TabsContent value="register">
+          <RegisterForm />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }

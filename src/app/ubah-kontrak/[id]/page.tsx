@@ -23,7 +23,7 @@ export default function UbahKontrakPage() {
 
   useEffect(() => {
     if (!isUserLoading && !user) {
-      router.replace('/login');
+      router.replace('/');
     }
   }, [user, isUserLoading, router]);
 
@@ -38,7 +38,7 @@ export default function UbahKontrakPage() {
       setContract(foundContract);
     } else {
       // If contract not found in the context, it means it doesn't exist or doesn't belong to the user
-      router.push('/');
+      router.push('/dashboard');
     }
   }, [id, getContractById, contractsLoading, router, user, isUserLoading]);
 

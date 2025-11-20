@@ -93,7 +93,7 @@ export function EditContractForm({ contract }: EditContractFormProps) {
           title: 'Sukses',
           description: 'Berhasil memperbarui kontrak.'
       });
-      router.push('/');
+      router.push('/dashboard');
   }
 
   return (
@@ -165,7 +165,7 @@ export function EditContractForm({ contract }: EditContractFormProps) {
       </div>
        
       <div className="flex gap-2">
-        <Button type="button" variant="outline" onClick={() => router.push('/')}>
+        <Button type="button" variant="outline" onClick={() => router.push('/dashboard')}>
             Batal
         </Button>
         <Button type="submit" className="w-full">

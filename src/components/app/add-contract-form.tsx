@@ -85,7 +85,7 @@ export function AddContractForm() {
           description: 'Berhasil menambahkan kontrak.'
       });
       formRef.current?.reset();
-      router.push('/');
+      router.push('/dashboard');
   }
 
 

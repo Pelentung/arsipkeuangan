@@ -12,7 +12,7 @@ export default function TambahKontrakPage() {
 
     useEffect(() => {
         if (!isUserLoading && !user) {
-            router.replace('/login');
+            router.replace('/');
         }
     }, [user, isUserLoading, router]);
 

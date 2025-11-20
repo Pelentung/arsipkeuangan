@@ -49,6 +49,18 @@ function fromTimestamp(timestamp: Timestamp | Date): string {
     return date.toISOString();
 }
 
+// Function to remove undefined properties from an object
+const removeUndefinedProps = (obj: any) => {
+  const newObj: any = {};
+  Object.keys(obj).forEach(key => {
+    if (obj[key] !== undefined) {
+      newObj[key] = obj[key];
+    }
+  });
+  return newObj;
+};
+
+
 export function useContractContextData(): ContractContextType {
   const { user } = useUser();
   const firestore = useFirestore();
@@ -83,7 +95,6 @@ export function useContractContextData(): ContractContextType {
     if (!contractsCollectionRef) return;
     const dataToSave = {
       ...newContractData,
-      // userId is implicitly defined by the collection path, but can be kept for flat queries if needed elsewhere
       userId: contractsCollectionRef.parent.parent?.id, 
       realization: 0,
       remainingValue: newContractData.value,
@@ -91,11 +102,14 @@ export function useContractContextData(): ContractContextType {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
-    addDoc(contractsCollectionRef, dataToSave).catch(async (serverError) => {
+    
+    const cleanedData = removeUndefinedProps(dataToSave);
+
+    addDoc(contractsCollectionRef, cleanedData).catch(async (serverError) => {
       const permissionError = new FirestorePermissionError({
         path: contractsCollectionRef.path,
         operation: 'create',
-        requestResourceData: dataToSave,
+        requestResourceData: cleanedData,
       });
       errorEmitter.emit('permission-error', permissionError);
     });
@@ -118,11 +132,13 @@ export function useContractContextData(): ContractContextType {
         updatedAt: serverTimestamp(),
     };
 
-    updateDoc(contractDoc, dataToUpdate).catch(async (serverError) => {
+    const cleanedData = removeUndefinedProps(dataToUpdate);
+
+    updateDoc(contractDoc, cleanedData).catch(async (serverError) => {
       const permissionError = new FirestorePermissionError({
         path: contractDoc.path,
         operation: 'update',
-        requestResourceData: dataToUpdate,
+        requestResourceData: cleanedData,
       });
       errorEmitter.emit('permission-error', permissionError);
     });

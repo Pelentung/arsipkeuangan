@@ -72,12 +72,20 @@ export function EditContractForm({ contract }: EditContractFormProps) {
       const updatedData: Partial<Contract> = {
           contractNumber: formData.get('contractNumber') as string,
           contractDate: formData.get('contractDate') as string,
-          addendumNumber: (formData.get('addendumNumber') as string) || undefined,
-          addendumDate: (formData.get('addendumDate') as string) || undefined,
           description: formData.get('description') as string,
           implementer: formData.get('implementer') as string,
           value: Number(formData.get('value')),
       };
+
+      const addendumNumber = formData.get('addendumNumber') as string;
+      const addendumDate = formData.get('addendumDate') as string;
+
+      if (addendumNumber) {
+        updatedData.addendumNumber = addendumNumber;
+      }
+      if (addendumDate) {
+        updatedData.addendumDate = addendumDate;
+      }
 
       updateContract(contract.id, updatedData);
       

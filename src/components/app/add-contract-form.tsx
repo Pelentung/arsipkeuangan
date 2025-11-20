@@ -61,16 +61,23 @@ export function AddContractForm() {
           return;
       }
       
-      const newContract = {
+      const newContract: any = {
           contractNumber: formData.get('contractNumber') as string,
           contractDate: formData.get('contractDate') as string,
-          addendumNumber: (formData.get('addendumNumber') as string) || undefined,
-          addendumDate: (formData.get('addendumDate') as string) || undefined,
           description: formData.get('description') as string,
           implementer: formData.get('implementer') as string,
           value: Number(formData.get('value')),
-          // userId is now handled by the context/path
       };
+
+      const addendumNumber = formData.get('addendumNumber') as string;
+      const addendumDate = formData.get('addendumDate') as string;
+
+      if (addendumNumber) {
+        newContract.addendumNumber = addendumNumber;
+      }
+      if (addendumDate) {
+        newContract.addendumDate = addendumDate;
+      }
 
       addContract(newContract);
       toast({

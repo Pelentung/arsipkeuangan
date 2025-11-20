@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   getAuth,
   signInWithEmailAndPassword,
@@ -17,7 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useFirebaseApp, useUser } from '@/firebase';
+import { useFirebaseApp } from '@/firebase';
 import Image from 'next/image';
 
 function LoginForm() {
@@ -98,19 +98,6 @@ function LoginForm() {
 }
 
 export default function WelcomePage() {
-  const { user, isUserLoading } = useUser();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isUserLoading && user) {
-      router.push('/dashboard');
-    }
-  }, [user, isUserLoading, router]);
-
-  if (isUserLoading || user) {
-    return <p>Mengalihkan...</p>;
-  }
-  
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
       <div className="flex flex-col items-center justify-center flex-1">

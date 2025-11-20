@@ -6,19 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useContractContext } from '@/contexts/contract-context';
 import { Download } from 'lucide-react';
 import { useUser } from '@/firebase';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 
 export default function LaporanPage() {
     const { contracts } = useContractContext();
     const { user, isUserLoading } = useUser();
-    const router = useRouter();
-
-    useEffect(() => {
-        if (!isUserLoading && !user) {
-            router.push('/');
-        }
-    }, [user, isUserLoading, router]);
 
     const escapeCsvCell = (cell: any): string => {
         if (cell === null || cell === undefined) {
@@ -120,7 +111,7 @@ export default function LaporanPage() {
     };
 
     if (isUserLoading || !user) {
-        return <p>Mengalihkan...</p>;
+        return null;
     }
     
     return (

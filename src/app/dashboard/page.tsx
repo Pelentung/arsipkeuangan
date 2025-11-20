@@ -1,7 +1,7 @@
 'use client';
 
 import { ContractView } from '@/components/app/contract-view';
-import { Suspense, useMemo, useEffect } from 'react';
+import { Suspense, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Coins, Receipt, Wallet, PlusCircle } from 'lucide-react';
 import { ContractStatusChart } from '@/components/app/contract-status-chart';
@@ -9,18 +9,10 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useContractContext } from '@/contexts/contract-context';
 import { useUser } from '@/firebase';
-import { useRouter } from 'next/navigation';
 
 function Dashboard() {
   const { contracts, loading } = useContractContext();
   const { user, isUserLoading } = useUser();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isUserLoading && !user) {
-      router.push('/');
-    }
-  }, [user, isUserLoading, router]);
 
   const summary = useMemo(() => {
     if (loading || !contracts) {
@@ -61,7 +53,7 @@ function Dashboard() {
   }, [contracts, loading]);
 
   if (isUserLoading || !user) {
-    return <p>Mengalihkan...</p>;
+    return null;
   }
 
   return (

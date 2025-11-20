@@ -22,12 +22,6 @@ export default function UbahKontrakPage() {
   const [contract, setContract] = useState<Contract | null>(null);
 
   useEffect(() => {
-    if (!isUserLoading && !user) {
-      router.push('/dashboard');
-    }
-  }, [user, isUserLoading, router]);
-
-  useEffect(() => {
     if (contractsLoading) return; // Wait until data is loaded
     const contractId = Array.isArray(id) ? id[0] : id;
     const foundContract = getContractById(contractId);

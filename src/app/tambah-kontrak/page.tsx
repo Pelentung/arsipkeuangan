@@ -3,21 +3,12 @@
 import { AddContractForm } from '@/components/app/add-contract-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUser } from '@/firebase';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 
 export default function TambahKontrakPage() {
     const { user, isUserLoading } = useUser();
-    const router = useRouter();
-
-    useEffect(() => {
-        if (!isUserLoading && !user) {
-            router.push('/dashboard');
-        }
-    }, [user, isUserLoading, router]);
 
     if (isUserLoading || !user) {
-        return <p>Mengalihkan...</p>
+        return null;
     }
 
     return (

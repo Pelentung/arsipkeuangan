@@ -15,7 +15,7 @@ function MainContent({ children }: { children: ReactNode }) {
                 <AppHeader />
                 <div className="flex flex-1">
                     <AppSidebar />
-                    <main className="flex-grow p-4 sm:p-6 lg:p-8 overflow-auto">
+                    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
                         {children}
                     </main>
                 </div>

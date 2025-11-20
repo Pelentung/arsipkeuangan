@@ -3,7 +3,7 @@
 import { firebaseConfig } from '@/firebase/config';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore }s from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 import { headers } from 'next/headers';
 import { getTokens } from 'next-firebase-auth-edge/lib/next/tokens';
 import { authConfig } from '@/config/auth-config';
@@ -11,10 +11,12 @@ import { authConfig } from '@/config/auth-config';
 // This function initializes a Firebase app instance (if not already done)
 // and returns the initialized app. It's safe to call multiple times.
 function initializeServerApp() {
-  if (getApps().length === 0) {
-    return initializeApp(firebaseConfig, 'server-app-authed');
+  const apps = getApps();
+  const serverApp = apps.find(app => app.name === 'server-app-authed');
+  if (serverApp) {
+      return serverApp;
   }
-  return getApp('server-app-authed');
+  return initializeApp(firebaseConfig, 'server-app-authed');
 }
 
 /**

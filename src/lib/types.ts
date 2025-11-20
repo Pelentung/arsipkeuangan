@@ -20,5 +20,6 @@ export interface Bill {
   sp2dDate: string; // Storing as ISO string
   description: string;
   amount: number;
+  status: 'Uang Muka (DP)' | 'Termin' | 'Termin Terakhir';
 }
   

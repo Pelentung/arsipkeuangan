@@ -60,15 +60,15 @@ export function useContractContextData(): ContractContextType {
     };
 
     const addBill = (contractId: string, bill: Omit<Bill, 'id'>) => {
+        // Here you would also add the bill itself to a list of bills if you were storing them.
+        // For now, we'll just update the financial figures on the contract.
+        // The full bill object (including status) is available in the `bill` parameter.
+        
         setContracts(prevContracts => {
             return prevContracts.map(contract => {
                 if (contract.id === contractId) {
                     const newRealization = contract.realization + bill.amount;
                     const newRemainingValue = contract.value - newRealization;
-                    
-                    // Here you would also add the bill itself to a list of bills if you were storing them.
-                    // Since the current data model doesn't store individual bills on the contract,
-                    // we'll just update the financial figures.
                     
                     return {
                         ...contract,

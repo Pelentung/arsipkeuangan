@@ -14,6 +14,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '../ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useRef, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -31,6 +38,7 @@ export function AddBillDialog({ contractId, userId }: AddBillDialogProps) {
   const { toast } = useToast();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { addBill } = useContractContext();
+  const [status, setStatus] = useState<string | undefined>();
 
   const validateForm = (formData: FormData) => {
     const newErrors: Record<string, string> = {};
@@ -40,6 +48,7 @@ export function AddBillDialog({ contractId, userId }: AddBillDialogProps) {
     if (!formData.get('sp2dDate')) newErrors.sp2dDate = 'Tanggal SP2D wajib diisi.';
     if (!formData.get('description')) newErrors.description = 'Uraian wajib diisi.';
     if (Number(formData.get('amount')) <= 0) newErrors.amount = 'Jumlah harus lebih dari 0.';
+    if (!status) newErrors.status = 'Status wajib dipilih.';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -65,6 +74,7 @@ export function AddBillDialog({ contractId, userId }: AddBillDialogProps) {
         sp2dDate: formData.get('sp2dDate') as string,
         description: formData.get('description') as string,
         amount: Number(formData.get('amount')),
+        status: status as Bill['status'],
     };
     
     addBill(contractId, newBill);
@@ -73,11 +83,18 @@ export function AddBillDialog({ contractId, userId }: AddBillDialogProps) {
         description: 'Tagihan berhasil ditambahkan.',
     });
     formRef.current?.reset();
+    setStatus(undefined);
     setOpen(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) {
+            setErrors({});
+            setStatus(undefined);
+        }
+    }}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className='w-full'>
           <Plus className="mr-2 h-4 w-4" />
@@ -121,6 +138,20 @@ export function AddBillDialog({ contractId, userId }: AddBillDialogProps) {
             <Label htmlFor="amount">Jumlah (Rp)</Label>
             <Input id="amount" name="amount" type="number" placeholder="0" />
             {errors.amount && <p className="text-sm font-medium text-destructive">{errors.amount}</p>}
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="status">Status</Label>
+            <Select name="status" onValueChange={setStatus} value={status}>
+                <SelectTrigger id="status">
+                    <SelectValue placeholder="Pilih status pembayaran" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="Uang Muka (DP)">Uang Muka (DP)</SelectItem>
+                    <SelectItem value="Termin">Termin</SelectItem>
+                    <SelectItem value="Termin Terakhir">Termin Terakhir</SelectItem>
+                </SelectContent>
+            </Select>
+            {errors.status && <p className="text-sm font-medium text-destructive">{errors.status}</p>}
           </div>
 
           <DialogFooter className='mt-4'>

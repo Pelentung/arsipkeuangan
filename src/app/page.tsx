@@ -8,9 +8,11 @@ import { ContractStatusChart } from '@/components/app/contract-status-chart';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useContractContext } from '@/contexts/contract-context';
+import { useUser } from '@/firebase';
 
 function Dashboard() {
   const { contracts, loading } = useContractContext();
+  const { user, claims } = useUser();
 
   const summary = useMemo(() => {
     if (loading || !contracts) {
@@ -50,8 +52,8 @@ function Dashboard() {
     return Object.entries(monthlyData).map(([month, data]) => ({ month, ...data }));
   }, [contracts, loading]);
 
-  if (loading) {
-    return <p>Memuat data lokal...</p>;
+  if (loading && !user) {
+    return <p>Mengautentikasi...</p>;
   }
 
   return (
@@ -60,7 +62,7 @@ function Dashboard() {
         <div>
             <h1 className="text-2xl font-bold tracking-tight">Data Kontrak</h1>
             <p className="text-muted-foreground">
-                Selamat datang! Berikut adalah ringkasan data keuangan Anda.
+                Selamat datang, {claims?.name || 'Pengguna'}! Berikut adalah ringkasan data keuangan Anda.
             </p>
         </div>
         <Link href="/tambah-kontrak" passHref>

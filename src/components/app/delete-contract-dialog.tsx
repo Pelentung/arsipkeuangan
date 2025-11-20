@@ -45,7 +45,7 @@ export function DeleteContractDialog({
           <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
           <AlertDialogDescription>
             Tindakan ini tidak dapat dibatalkan. Ini akan menghapus kontrak
-            secara permanen dari penyimpanan lokal.
+            secara permanen dari database.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

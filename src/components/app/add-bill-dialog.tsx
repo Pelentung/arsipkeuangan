@@ -27,19 +27,20 @@ import { useToast } from '@/hooks/use-toast';
 import { useContractContext } from '@/contexts/contract-context';
 import type { Bill } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useUser } from '@/firebase';
 
 interface AddBillDialogProps {
   contractId: string;
-  userId: string;
   className?: string;
 }
 
-export function AddBillDialog({ contractId, userId, className }: AddBillDialogProps) {
+export function AddBillDialog({ contractId, className }: AddBillDialogProps) {
   const [open, setOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { addBill } = useContractContext();
+  const { user } = useUser();
   const [status, setStatus] = useState<string | undefined>();
 
   const validateForm = (formData: FormData) => {
@@ -58,6 +59,10 @@ export function AddBillDialog({ contractId, userId, className }: AddBillDialogPr
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!user) {
+      toast({ title: 'Error', description: 'You must be logged in.', variant: 'destructive' });
+      return;
+    }
     const formData = new FormData(event.currentTarget);
 
     if (!validateForm(formData)) {

@@ -5,9 +5,11 @@ import { ContractView } from '@/components/app/contract-view';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useContractContext } from '@/contexts/contract-context';
 import { Download } from 'lucide-react';
+import { useUser } from '@/firebase';
 
 export default function LaporanPage() {
     const { contracts } = useContractContext();
+    const { user } = useUser();
 
     const escapeCsvCell = (cell: any): string => {
         if (cell === null || cell === undefined) {
@@ -21,6 +23,10 @@ export default function LaporanPage() {
     };
 
     const handleExport = () => {
+        if (!user) {
+            alert('Anda harus login untuk mengekspor data.');
+            return;
+        }
         if (contracts.length === 0) {
             alert('Tidak ada data untuk diekspor.');
             return;
@@ -102,7 +108,7 @@ export default function LaporanPage() {
                             Unduh semua data kontrak dan tagihan atau lihat langsung di bawah.
                         </CardDescription>
                     </div>
-                     <Button onClick={handleExport}>
+                     <Button onClick={handleExport} disabled={!user}>
                         <Download className="mr-2 h-4 w-4" />
                         Ekspor ke CSV
                     </Button>

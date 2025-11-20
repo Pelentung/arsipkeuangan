@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { useContractContext } from '@/contexts/contract-context';
+import { useUser } from '@/firebase';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { Contract } from '@/lib/types';
@@ -16,21 +17,36 @@ import type { Contract } from '@/lib/types';
 export default function UbahKontrakPage() {
   const { id } = useParams();
   const router = useRouter();
-  const { getContractById, loading } = useContractContext();
+  const { user, loading: userLoading } = useUser();
+  const { getContractById, loading: contractsLoading } = useContractContext();
   const [contract, setContract] = useState<Contract | null>(null);
 
   useEffect(() => {
-    if (loading) return; // Wait until data is loaded
+    if (!userLoading && !user) {
+      router.replace('/login');
+    }
+  }, [user, userLoading, router]);
+
+  useEffect(() => {
+    if (contractsLoading || !user) return; // Wait until data is loaded
     const contractId = Array.isArray(id) ? id[0] : id;
     const foundContract = getContractById(contractId);
 
     if (foundContract) {
-      setContract(foundContract);
+      // Security check: ensure user owns the contract
+      if (foundContract.userId === user.uid) {
+        setContract(foundContract);
+      } else {
+        router.push('/'); // Redirect if not owner
+      }
     } else {
-      // Handle case where contract is not found, maybe redirect
       router.push('/');
     }
-  }, [id, getContractById, loading, router]);
+  }, [id, getContractById, contractsLoading, router, user, userLoading]);
+
+  if (userLoading || contractsLoading || !contract) {
+    return <p>Memuat data kontrak...</p>;
+  }
 
   return (
     <main className="flex-1 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
@@ -42,11 +58,7 @@ export default function UbahKontrakPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {contract ? (
-            <EditContractForm contract={contract} />
-          ) : (
-            <p>Memuat data kontrak...</p>
-          )}
+          <EditContractForm contract={contract} />
         </CardContent>
       </Card>
     </main>

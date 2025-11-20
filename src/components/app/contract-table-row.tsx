@@ -36,11 +36,13 @@ import { cn } from '@/lib/utils';
 interface ContractTableRowProps {
   contract: Contract;
   isOpen: boolean;
+  onToggle: () => void;
 }
 
 export default function ContractTableRow({
   contract,
   isOpen,
+  onToggle,
 }: ContractTableRowProps) {
   const contractDate = new Date(contract.contractDate);
 
@@ -57,7 +59,8 @@ export default function ContractTableRow({
   return (
     <>
       <TableRow
-        className="bg-card hover:bg-card/90"
+        className="bg-card hover:bg-card/90 cursor-pointer"
+        onClick={onToggle}
         data-state={isOpen ? 'open' : 'closed'}
       >
         <TableCell>
@@ -89,10 +92,9 @@ export default function ContractTableRow({
             {status}
           </Badge>
         </TableCell>
-        <TableCell className="text-center">
+        <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center justify-center gap-1">
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+            <Button variant="ghost" size="icon" className="h-8 w-8 p-0" onClick={onToggle}>
                 {isOpen ? (
                   <ChevronUp className="h-4 w-4" />
                 ) : (
@@ -100,8 +102,7 @@ export default function ContractTableRow({
                 )}
                 <span className="sr-only">Lihat Tagihan</span>
               </Button>
-            </CollapsibleTrigger>
-            <AddBillDialog contractId={contract.id} userId={contract.userId} />
+            <AddBillDialog contractId={contract.id} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-8 w-8 p-0">
@@ -123,8 +124,7 @@ export default function ContractTableRow({
           </div>
         </TableCell>
       </TableRow>
-      <CollapsibleContent asChild>
-        <TableRow>
+      <TableRow className={cn(!isOpen && 'hidden')}>
           <TableCell colSpan={8} className="p-0">
             <div className="p-4 bg-muted/50">
               <h4 className="font-semibold mb-2">Detail Tagihan</h4>
@@ -162,7 +162,6 @@ export default function ContractTableRow({
             </div>
           </TableCell>
         </TableRow>
-      </CollapsibleContent>
     </>
   );
 }

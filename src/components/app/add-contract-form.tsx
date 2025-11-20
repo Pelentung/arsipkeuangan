@@ -8,12 +8,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useRouter } from 'next/navigation';
 import { useContractContext } from '@/contexts/contract-context';
+import { useUser } from '@/firebase';
 
 export function AddContractForm() {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
   const { addContract } = useContractContext();
+  const { user } = useUser();
 
   const [value, setValue] = useState(0);
   const realization = 0; // Realization starts at 0, managed by bills
@@ -39,6 +41,15 @@ export function AddContractForm() {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
+      if (!user) {
+        toast({
+          title: 'Error',
+          description: 'Anda harus login untuk menambahkan kontrak.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const formData = new FormData(event.currentTarget);
       
       if (!validateForm(formData)) {
@@ -58,7 +69,7 @@ export function AddContractForm() {
           description: formData.get('description') as string,
           implementer: formData.get('implementer') as string,
           value: Number(formData.get('value')),
-          userId: 'local-user', // Placeholder for local storage
+          userId: user.uid,
       };
 
       addContract(newContract);

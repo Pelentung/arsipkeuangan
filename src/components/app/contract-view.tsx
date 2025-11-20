@@ -15,8 +15,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import ContractTableRow from './contract-table-row';
-import { Collapsible, CollapsibleContent } from '../ui/collapsible';
-import BillTableRow from './bill-table-row';
 
 export function ContractView() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -83,17 +81,12 @@ export function ContractView() {
             </TableHeader>
             <TableBody>
               {filteredContracts.map((contract) => (
-                <Collapsible
-                  key={contract.id}
-                  asChild
-                  open={openStates[contract.id] || false}
-                  onOpenChange={() => toggleRow(contract.id)}
-                >
-                  <ContractTableRow
+                <ContractTableRow
+                    key={contract.id}
                     contract={contract}
                     isOpen={openStates[contract.id] || false}
-                  />
-                </Collapsible>
+                    onToggle={() => toggleRow(contract.id)}
+                />
               ))}
             </TableBody>
           </Table>

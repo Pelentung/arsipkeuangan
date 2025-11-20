@@ -1,1 +1,2 @@
-// This file is intentionally left blank as Firebase is no longer used.
+// This file is intentionally left blank. 
+// Firebase configuration is handled by environment variables.

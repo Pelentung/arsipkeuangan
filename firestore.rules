@@ -1,14 +1,17 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Deny all access by default
+    
+    // Default deny all
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // Allow users to read and write their own data
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth.uid == userId;
+    // Contracts collection
+    match /contracts/{contractId} {
+      // Allow read, create, update, delete for the user who owns the document.
+      allow read, update, delete: if request.auth.uid == resource.data.userId;
+      allow create: if request.auth.uid == request.resource.data.userId;
     }
   }
 }

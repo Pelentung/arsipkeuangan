@@ -1,3 +1,5 @@
+import type { Timestamp } from 'firebase/firestore';
+
 export interface Contract {
     id: string;
     userId: string;
@@ -11,6 +13,8 @@ export interface Contract {
     realization: number;
     remainingValue: number;
     bills: Bill[];
+    createdAt?: Timestamp;
+    updatedAt?: Timestamp;
   }
 
 export interface Bill {
@@ -24,3 +28,8 @@ export interface Bill {
   status: 'Uang Muka (DP)' | 'Termin' | 'Termin Terakhir';
 }
   
+export interface UserClaims {
+  name?: string;
+  picture?: string;
+  email?: string;
+}

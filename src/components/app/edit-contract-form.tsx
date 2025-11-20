@@ -21,9 +21,8 @@ export function EditContractForm({ contract }: EditContractFormProps) {
   const { toast } = useToast();
   const { updateContract } = useContractContext();
 
-  // The value is directly from the contract, no need for local state
   const [value, setValue] = useState(contract.value);
-  const realization = contract.realization; // Realization is now managed by bills
+  const realization = contract.realization;
   const remainingValue = value - realization;
   
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -35,10 +34,13 @@ export function EditContractForm({ contract }: EditContractFormProps) {
   const formatDateForInput = (dateString: string) => {
     if (!dateString) return '';
     try {
-      // Assuming dateString is 'yyyy-MM-dd' or ISO string
       return format(parseISO(dateString), 'yyyy-MM-dd');
     } catch {
-      return ''; // Handle invalid date format
+      try {
+        return format(new Date(dateString), 'yyyy-MM-dd');
+      } catch {
+        return '';
+      }
     }
   };
   
@@ -67,7 +69,7 @@ export function EditContractForm({ contract }: EditContractFormProps) {
           return;
       }
       
-      const updatedData = {
+      const updatedData: Partial<Contract> = {
           contractNumber: formData.get('contractNumber') as string,
           contractDate: formData.get('contractDate') as string,
           addendumNumber: (formData.get('addendumNumber') as string) || undefined,
@@ -75,7 +77,6 @@ export function EditContractForm({ contract }: EditContractFormProps) {
           description: formData.get('description') as string,
           implementer: formData.get('implementer') as string,
           value: Number(formData.get('value')),
-          // Realization is no longer directly editable
       };
 
       updateContract(contract.id, updatedData);

@@ -1,11 +1,9 @@
 'use server';
-// IMPORTANT: This file should not be marked with 'use client'
-// It's designed for server-side execution only.
 
 import { firebaseConfig } from '@/firebase/config';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore }s from 'firebase/firestore';
 import { headers } from 'next/headers';
 import { getTokens } from 'next-firebase-auth-edge/lib/next/tokens';
 import { authConfig } from '@/config/auth-config';
@@ -14,9 +12,9 @@ import { authConfig } from '@/config/auth-config';
 // and returns the initialized app. It's safe to call multiple times.
 function initializeServerApp() {
   if (getApps().length === 0) {
-    return initializeApp(firebaseConfig, 'server-app');
+    return initializeApp(firebaseConfig, 'server-app-authed');
   }
-  return getApp('server-app');
+  return getApp('server-app-authed');
 }
 
 /**
@@ -47,6 +45,7 @@ export async function getAuthedFirebase() {
   return { auth, firestore, app };
 }
 
+
 // These are additional configs required for next-firebase-auth-edge
 export const authConfigServer = {
   apiKey: firebaseConfig.apiKey,
@@ -59,5 +58,11 @@ export const authConfigServer = {
     sameSite: 'lax' as const,
     maxAge: 12 * 60 * 60 * 24, // 12 days
   },
-  serviceAccount: {}, // Leave empty for App Hosting
+  serviceAccount: {
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL!,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY
+      ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+      : undefined,
+  },
 };

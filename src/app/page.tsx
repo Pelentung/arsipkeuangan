@@ -23,8 +23,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useFirebaseApp, useUser } from '@/firebase';
 import { Separator } from '@/components/ui/separator';
 import { AppIcon } from '@/components/app/app-icon';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
 
 function LoginForm() {
   const firebaseApp = useFirebaseApp();
@@ -76,9 +74,9 @@ function LoginForm() {
   };
 
   return (
-    <Card className="border-0 shadow-none">
+    <Card className="border-0 shadow-none w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Selamat Datang Kembali!</CardTitle>
+          <CardTitle className="text-2xl">Selamat Datang!</CardTitle>
           <CardDescription>
             Masukkan email dan kata sandi Anda untuk melanjutkan.
           </CardDescription>
@@ -135,122 +133,6 @@ function LoginForm() {
   )
 }
 
-
-function RegisterForm() {
-  const firebaseApp = useFirebaseApp();
-  const auth = getAuth(firebaseApp);
-  const router = useRouter();
-  const { toast } = useToast();
-
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleRegister = () => {
-    if (!name) {
-      toast({
-        title: 'Gagal Registrasi',
-        description: 'Nama tidak boleh kosong.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        return updateProfile(user, {
-          displayName: name,
-        });
-      })
-      .then(() => {
-        router.push('/dashboard');
-      })
-      .catch((error: any) => {
-        let description = 'Terjadi kesalahan saat mencoba mendaftar.';
-        switch (error.code) {
-          case 'auth/email-already-in-use':
-            description = 'Email ini sudah digunakan oleh akun lain.';
-            break;
-          case 'auth/weak-password':
-            description = 'Kata sandi terlalu lemah. Minimal 6 karakter.';
-            break;
-          case 'auth/invalid-email':
-            description = 'Format email tidak valid.';
-            break;
-        }
-        toast({
-          title: 'Gagal Registrasi',
-          description,
-          variant: 'destructive',
-        });
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  };
-
-  return (
-     <Card className="border-0 shadow-none">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Buat Akun Baru</CardTitle>
-          <CardDescription>
-            Isi form di bawah ini untuk membuat akun Anda.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-           <div className="grid gap-2">
-            <Label htmlFor="register-name">Nama</Label>
-            <Input
-              id="register-name"
-              type="text"
-              placeholder="Nama Lengkap Anda"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="register-email">Email</Label>
-            <Input
-              id="register-email"
-              type="email"
-              placeholder="nama@email.com"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="register-password">Kata Sandi</Label>
-            <Input
-              id="register-password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-4">
-          <Button
-            className="w-full"
-            onClick={handleRegister}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Memproses...' : 'Daftar'}
-          </Button>
-        </CardFooter>
-      </Card>
-  )
-}
-
-
 export default function WelcomePage() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
@@ -271,18 +153,7 @@ export default function WelcomePage() {
         <AppIcon className="w-8 h-8 text-primary" />
         <h1 className="text-2xl font-bold">Gudang Kontrak</h1>
       </div>
-      <Tabs defaultValue="login" className="w-full max-w-sm">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="login">Login</TabsTrigger>
-          <TabsTrigger value="register">Daftar</TabsTrigger>
-        </TabsList>
-        <TabsContent value="login">
-          <LoginForm />
-        </TabsContent>
-        <TabsContent value="register">
-          <RegisterForm />
-        </TabsContent>
-      </Tabs>
+      <LoginForm />
     </div>
   );
 }

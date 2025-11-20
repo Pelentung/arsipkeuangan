@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { ContractView } from '@/components/app/contract-view';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useContractContext } from '@/contexts/contract-context';
 import { Download } from 'lucide-react';
@@ -92,24 +93,23 @@ export default function LaporanPage() {
     };
     
     return (
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
-            <Card className="w-full max-w-2xl text-center">
-                <CardHeader>
-                    <CardTitle>Ekspor Laporan Keuangan</CardTitle>
-                    <CardDescription>
-                        Unduh semua data kontrak dan tagihan Anda dalam format CSV untuk analisis lebih lanjut di aplikasi spreadsheet.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Button onClick={handleExport}>
+        <main className="flex-1 flex-col p-4 sm:p-6 lg:p-8">
+             <Card className="w-full mb-8">
+                <CardHeader className='flex-row items-center justify-between'>
+                    <div>
+                        <CardTitle>Laporan Keuangan</CardTitle>
+                        <CardDescription>
+                            Unduh semua data kontrak dan tagihan atau lihat langsung di bawah.
+                        </CardDescription>
+                    </div>
+                     <Button onClick={handleExport}>
                         <Download className="mr-2 h-4 w-4" />
-                        Ekspor Semua Data ke CSV
+                        Ekspor ke CSV
                     </Button>
-                    <p className="text-xs text-muted-foreground mt-4">
-                        File akan berisi semua detail kontrak dan setiap tagihan yang terkait sebagai baris terpisah.
-                    </p>
-                </CardContent>
+                </CardHeader>
             </Card>
+
+            <ContractView />
         </main>
     );
 }

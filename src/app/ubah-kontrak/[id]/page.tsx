@@ -33,13 +33,11 @@ export default function UbahKontrakPage() {
     const foundContract = getContractById(contractId);
 
     if (foundContract) {
-      // Security check: ensure user owns the contract
-      if (foundContract.userId === user.uid) {
-        setContract(foundContract);
-      } else {
-        router.push('/'); // Redirect if not owner
-      }
+      // The security check is now implicitly handled by the context which only fetches user's own contracts.
+      // So no need to check foundContract.userId === user.uid
+      setContract(foundContract);
     } else {
+      // If contract not found in the context, it means it doesn't exist or doesn't belong to the user
       router.push('/');
     }
   }, [id, getContractById, contractsLoading, router, user, isUserLoading]);

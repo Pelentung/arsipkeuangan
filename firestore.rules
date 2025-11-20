@@ -4,27 +4,27 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Function to check if the requesting user is the owner of the document
     function isOwner(userId) {
       return request.auth != null && request.auth.uid == userId;
     }
 
-    match /contracts/{contractId} {
-      // Allow read access only to the user who owns the contract
-      allow get, list: if isOwner(resource.data.userId);
+    // Rules for the 'users' collection
+    match /users/{userId} {
+      // Users can only read/write to their own document space
+      allow read, write: if isOwner(userId);
 
-      // Allow create access if the user is authenticated and the userId in the document matches their uid
-      allow create: if isOwner(request.resource.data.userId);
-
-      // Allow update access only to the owner of the document
-      allow update: if isOwner(resource.data.userId);
-
-      // Allow delete access only to the owner of the document
-      allow delete: if isOwner(resource.data.userId);
+      // Rules for the 'contracts' subcollection within each user document
+      match /contracts/{contractId} {
+        // Only the owner of the user document can manage their contracts
+        allow get, list, create, update, delete: if isOwner(userId);
+      }
     }
 
+    // Parties are public, anyone can read them, but no one can write.
     match /parties/{partyId} {
-      allow get, list: if true;
-      allow create, update, delete: if false; // Managed by backend
+      allow get, list: if request.auth != null;
+      allow create, update, delete: if false; // Managed by a backend process
     }
   }
 }

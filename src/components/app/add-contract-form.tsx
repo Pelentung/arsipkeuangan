@@ -69,7 +69,7 @@ export function AddContractForm() {
           description: formData.get('description') as string,
           implementer: formData.get('implementer') as string,
           value: Number(formData.get('value')),
-          userId: user.uid,
+          // userId is now handled by the context/path
       };
 
       addContract(newContract);

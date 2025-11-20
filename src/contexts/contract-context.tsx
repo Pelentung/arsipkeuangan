@@ -15,8 +15,6 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
-  query,
-  where,
   serverTimestamp,
   Timestamp,
 } from 'firebase/firestore';
@@ -55,13 +53,12 @@ export function useContractContextData(): ContractContextType {
   const { user } = useUser();
   const firestore = useFirestore();
 
-  const contractsQuery = useMemoFirebase(() => {
+  const contractsCollectionRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
-    const contractsCollection = collection(firestore, 'contracts');
-    return query(contractsCollection, where('userId', '==', user.uid));
+    return collection(firestore, 'users', user.uid, 'contracts');
   }, [firestore, user]);
 
-  const { data: contractsData, isLoading: contractsLoading } = useCollection(contractsQuery, {
+  const { data: contractsData, isLoading: contractsLoading } = useCollection(contractsCollectionRef, {
       snapshotListenOptions: { includeMetadataChanges: true },
   });
   
@@ -83,31 +80,31 @@ export function useContractContextData(): ContractContextType {
   const loading = contractsLoading;
 
   const addContract = useCallback(async (newContractData: Omit<Contract, 'id'| 'realization' | 'remainingValue' | 'bills' | 'userId'>) => {
-    if (!firestore || !user) return;
-    const contractsCollection = collection(firestore, 'contracts');
+    if (!contractsCollectionRef) return;
     const dataToSave = {
       ...newContractData,
-      userId: user.uid,
+      // userId is implicitly defined by the collection path, but can be kept for flat queries if needed elsewhere
+      userId: contractsCollectionRef.parent.parent?.id, 
       realization: 0,
       remainingValue: newContractData.value,
       bills: [],
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
-    addDoc(contractsCollection, dataToSave).catch(async (serverError) => {
+    addDoc(contractsCollectionRef, dataToSave).catch(async (serverError) => {
       const permissionError = new FirestorePermissionError({
-        path: contractsCollection.path,
+        path: contractsCollectionRef.path,
         operation: 'create',
         requestResourceData: dataToSave,
       });
       errorEmitter.emit('permission-error', permissionError);
     });
-  }, [firestore, user]);
+  }, [contractsCollectionRef]);
 
 
   const updateContract = useCallback(async (contractId: string, updatedData: Partial<Omit<Contract, 'id' | 'userId' | 'bills'>>) => {
-    if (!firestore) return;
-    const contractDoc = doc(firestore, 'contracts', contractId);
+    if (!contractsCollectionRef) return;
+    const contractDoc = doc(contractsCollectionRef, contractId);
     
     const originalContract = contracts.find(c => c.id === contractId);
     if (!originalContract) return;
@@ -129,11 +126,11 @@ export function useContractContextData(): ContractContextType {
       });
       errorEmitter.emit('permission-error', permissionError);
     });
-  }, [firestore, contracts]);
+  }, [contractsCollectionRef, contracts]);
 
   const deleteContract = useCallback(async (contractId: string) => {
-    if (!firestore) return;
-    const contractDoc = doc(firestore, 'contracts', contractId);
+    if (!contractsCollectionRef) return;
+    const contractDoc = doc(contractsCollectionRef, contractId);
     deleteDoc(contractDoc).catch(async (serverError) => {
       const permissionError = new FirestorePermissionError({
         path: contractDoc.path,
@@ -141,15 +138,15 @@ export function useContractContextData(): ContractContextType {
       });
       errorEmitter.emit('permission-error', permissionError);
     });
-  }, [firestore]);
+  }, [contractsCollectionRef]);
 
   const addBill = useCallback(async (contractId: string, billData: Omit<Bill, 'id'>) => {
-    if (!firestore) return;
-    const contractDocRef = doc(firestore, 'contracts', contractId);
+    if (!contractsCollectionRef) return;
+    const contractDocRef = doc(contractsCollectionRef, contractId);
     const originalContract = contracts.find(c => c.id === contractId);
     if (!originalContract) return;
 
-    const newBill: Bill = { ...billData, id: doc(collection(firestore, 'temp')).id };
+    const newBill: Bill = { ...billData, id: doc(collection(firestore, '_')).id };
 
     const updatedBills = [...(originalContract.bills || []), newBill];
     const newRealization = updatedBills.reduce((sum, b) => sum + b.amount, 0);
@@ -170,11 +167,11 @@ export function useContractContextData(): ContractContextType {
         });
         errorEmitter.emit('permission-error', permissionError);
     });
-  }, [firestore, contracts]);
+  }, [contractsCollectionRef, contracts, firestore]);
 
   const updateBill = useCallback(async (contractId: string, billId: string, updatedBillData: Omit<Bill, 'id'>) => {
-     if (!firestore) return;
-    const contractDocRef = doc(firestore, 'contracts', contractId);
+     if (!contractsCollectionRef) return;
+    const contractDocRef = doc(contractsCollectionRef, contractId);
     const originalContract = contracts.find(c => c.id === contractId);
     if (!originalContract) return;
 
@@ -200,11 +197,11 @@ export function useContractContextData(): ContractContextType {
         });
         errorEmitter.emit('permission-error', permissionError);
     });
-  }, [firestore, contracts]);
+  }, [contractsCollectionRef, contracts]);
 
   const deleteBill = useCallback(async (contractId: string, billId: string) => {
-    if (!firestore) return;
-    const contractDocRef = doc(firestore, 'contracts', contractId);
+    if (!contractsCollectionRef) return;
+    const contractDocRef = doc(contractsCollectionRef, contractId);
     const originalContract = contracts.find(c => c.id === contractId);
     if (!originalContract) return;
     
@@ -227,7 +224,7 @@ export function useContractContextData(): ContractContextType {
         });
         errorEmitter.emit('permission-error', permissionError);
     });
-  }, [firestore, contracts]);
+  }, [contractsCollectionRef, contracts]);
 
   const getContractById = useCallback((contractId: string) => {
     return contracts.find((c) => c.id === contractId);

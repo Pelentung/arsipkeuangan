@@ -52,7 +52,6 @@ export default function ContractTableRow({
   };
 
   const status = contract.remainingValue <= 0 ? 'Selesai' : 'Belum Selesai';
-  const isGuest = user?.isAnonymous;
 
   return (
     <>
@@ -99,29 +98,25 @@ export default function ContractTableRow({
                 )}
                 <span className="sr-only">Lihat Tagihan</span>
               </Button>
-            {!isGuest && (
-              <>
-                <AddBillDialog contractId={contract.id} />
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                      <span className="sr-only">Buka menu</span>
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Aksi Kontrak</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href={`/ubah-kontrak/${contract.id}`}>
-                        Ubah Kontrak
-                      </Link>
-                    </DropdownMenuItem>
-                    <DeleteContractDialog contractId={contract.id} />
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            )}
+            <AddBillDialog contractId={contract.id} />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Buka menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Aksi Kontrak</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href={`/ubah-kontrak/${contract.id}`}>
+                    Ubah Kontrak
+                  </Link>
+                </DropdownMenuItem>
+                <DeleteContractDialog contractId={contract.id} />
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </TableCell>
       </TableRow>

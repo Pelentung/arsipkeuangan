@@ -76,7 +76,7 @@ export function useContractContextData(): ContractContextType {
 
   const contractsCollectionRef = useMemo(() => {
     if (!firestore || !user) return null;
-    return collection(firestore, 'contracts');
+    return collection(firestore, 'users', user.uid, 'contracts');
   }, [firestore, user]);
 
   const { data: contractsData, isLoading: contractsLoading } = useCollection(contractsCollectionRef, {
@@ -101,10 +101,9 @@ export function useContractContextData(): ContractContextType {
   const loading = contractsLoading;
 
   const addContract = useCallback(async (newContractData: Omit<Contract, 'id'| 'realization' | 'remainingValue' | 'bills' | 'userId'>) => {
-    if (!contractsCollectionRef || !user) return;
+    if (!contractsCollectionRef) return;
     const dataToSave = {
       ...newContractData,
-      userId: user.uid, 
       realization: 0,
       remainingValue: newContractData.value,
       bills: [],
@@ -122,7 +121,7 @@ export function useContractContextData(): ContractContextType {
       });
       errorEmitter.emit('permission-error', permissionError);
     });
-  }, [contractsCollectionRef, user]);
+  }, [contractsCollectionRef]);
 
 
   const updateContract = useCallback(async (contractId: string, updatedData: Partial<Omit<Contract, 'id' | 'userId' | 'bills'>>) => {

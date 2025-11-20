@@ -43,10 +43,6 @@ export function AddBillDialog({ contractId, className }: AddBillDialogProps) {
   const { user } = useUser();
   const [status, setStatus] = useState<string | undefined>();
 
-  if (!user || user.isAnonymous) {
-    return null;
-  }
-
   const validateForm = (formData: FormData) => {
     const newErrors: Record<string, string> = {};
     if (!formData.get('spmNumber')) newErrors.spmNumber = 'Nomor SPM wajib diisi.';
@@ -61,8 +57,8 @@ export function AddBillDialog({ contractId, className }: AddBillDialogProps) {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!user || user.isAnonymous) {
-      toast({ title: 'Akses Ditolak', description: 'Mode tamu tidak dapat menambah data.', variant: 'destructive' });
+    if (!user) {
+      toast({ title: 'Akses Ditolak', description: 'Anda harus login untuk menambah data.', variant: 'destructive' });
       return;
     }
     const formData = new FormData(event.currentTarget);

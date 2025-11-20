@@ -32,10 +32,10 @@ export function DeleteBillDialog({
 
   const handleDelete = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    if (user?.isAnonymous) {
+    if (!user) {
       toast({
         title: 'Akses Ditolak',
-        description: 'Mode tamu tidak dapat menghapus data.',
+        description: 'Anda harus login untuk menghapus data.',
         variant: 'destructive',
       });
       return;
@@ -50,7 +50,7 @@ export function DeleteBillDialog({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={user?.isAnonymous}>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
           Hapus Tagihan
         </DropdownMenuItem>
       </AlertDialogTrigger>

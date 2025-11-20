@@ -46,21 +46,6 @@ export function EditBillDialog({ contractId, bill, isMenuItem = false }: EditBil
   const { user } = useUser();
   const [status, setStatus] = useState<string | undefined>(bill.status);
 
-  if (!user || user.isAnonymous) {
-      const Trigger = isMenuItem ? DropdownMenuItem : Button;
-      return (
-        <Trigger 
-            disabled 
-            {...(isMenuItem 
-                ? { onSelect: (e) => e.preventDefault() } 
-                : { variant: "ghost", size: "icon", className: "h-8 w-8 p-0" })}
-        >
-            <Edit className={cn("h-4 w-4", isMenuItem && "mr-2")} />
-            {isMenuItem ? 'Ubah Tagihan' : <span className="sr-only">Ubah Tagihan</span>}
-        </Trigger>
-      )
-  }
-
   const formatDateForInput = (dateString: string | undefined) => {
     if (!dateString) return '';
     try {
@@ -84,8 +69,8 @@ export function EditBillDialog({ contractId, bill, isMenuItem = false }: EditBil
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (user?.isAnonymous) {
-        toast({ title: 'Akses Ditolak', description: 'Mode tamu tidak dapat mengubah data.', variant: 'destructive'});
+    if (!user) {
+        toast({ title: 'Akses Ditolak', description: 'Anda harus login untuk mengubah data.', variant: 'destructive'});
         return;
     }
 

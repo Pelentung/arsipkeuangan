@@ -71,17 +71,15 @@ function Dashboard() {
         <div>
             <h1 className="text-2xl font-bold tracking-tight">Data Kontrak</h1>
             <p className="text-muted-foreground">
-                Selamat datang, {user?.displayName || 'Pengguna'}! {user?.isAnonymous && '(Mode Tamu: Hanya Baca)'}
+                Selamat datang, {user?.displayName || 'Pengguna'}!
             </p>
         </div>
-        {!user.isAnonymous && (
-          <Link href="/tambah-kontrak" passHref>
-              <Button>
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Tambah Data
-              </Button>
-          </Link>
-        )}
+        <Link href="/tambah-kontrak" passHref>
+            <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Tambah Data
+            </Button>
+        </Link>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">

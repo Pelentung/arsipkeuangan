@@ -11,12 +11,12 @@ export default function TambahKontrakPage() {
     const router = useRouter();
 
     useEffect(() => {
-        if (!isUserLoading && (!user || user.isAnonymous)) {
+        if (!isUserLoading && !user) {
             router.push('/dashboard');
         }
     }, [user, isUserLoading, router]);
 
-    if (isUserLoading || !user || user.isAnonymous) {
+    if (isUserLoading || !user) {
         return <p>Mengalihkan...</p>
     }
 

@@ -8,31 +8,8 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
 
-    function isResourceOwner(resource) {
-      return request.auth != null && request.auth.uid == resource.data.userId;
-    }
-    
-    function isRequestingUserOwner() {
-      return request.auth != null && request.auth.uid == request.resource.data.userId;
-    }
-
-    function isRegularUser() {
-      return request.auth.token.firebase.sign_in_provider != 'anonymous';
-    }
-
-    match /contracts/{contractId} {
-      allow get, list: if request.auth != null;
-      allow create: if isRegularUser() && isRequestingUserOwner();
-      allow update, delete: if isRegularUser() && isResourceOwner(resource);
-    }
-
-    match /users/{userId} {
+    match /users/{userId}/{document=**} {
       allow read, write: if isOwner(userId);
-    }
-
-    match /parties/{partyId} {
-      allow get, list: if request.auth != null;
-      allow create, update, delete: if false;
     }
   }
 }

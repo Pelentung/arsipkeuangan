@@ -18,6 +18,9 @@ function MainContent({ children }: { children: ReactNode }) {
                   <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
                     {children}
                   </main>
+                  <footer className="p-4 text-center border-t">
+                    <p className="text-sm text-muted-foreground">Design Aplication By : PELENTUNG</p>
+                  </footer>
                 </div>
             </div>
             <FirebaseErrorListener />

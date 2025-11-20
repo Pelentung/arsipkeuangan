@@ -113,22 +113,27 @@ export default function WelcomePage() {
   
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
-      <div className="flex flex-col items-center gap-4 mb-6 text-center">
-        <Image 
-          src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Logo_Kota_Medan_%28Seal_of_Medan%29.svg/500px-Logo_Kota_Medan_%28Seal_of_Medan%29.svg.png?20190418174340"
-          alt="Logo Kota Medan"
-          width={100}
-          height={100}
-          className='mb-4'
-        />
-        <div className="relative flex w-full max-w-md overflow-x-hidden">
-             <p className="whitespace-nowrap animate-marquee font-headline text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-blue-600">
-                Dinas Perumahan Kawasan Permukiman Cipta Karya dan Tata Ruang Kota Medan
-            </p>
+      <div className="flex flex-col items-center justify-center flex-1">
+        <div className="flex flex-col items-center gap-4 mb-6 text-center">
+          <Image 
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Logo_Kota_Medan_%28Seal_of_Medan%29.svg/500px-Logo_Kota_Medan_%28Seal_of_Medan%29.svg.png?20190418174340"
+            alt="Logo Kota Medan"
+            width={100}
+            height={100}
+            className='mb-4'
+          />
+          <div className="relative flex w-full max-w-md overflow-x-hidden">
+              <p className="whitespace-nowrap animate-marquee font-headline text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-blue-600">
+                  Dinas Perumahan Kawasan Permukiman Cipta Karya dan Tata Ruang Kota Medan
+              </p>
+          </div>
+          <h1 className="text-2xl font-headline font-bold text-center">ARSIP DATA KONTRAK</h1>
         </div>
-        <h1 className="text-2xl font-headline font-bold text-center">ARSIP DATA KONTRAK</h1>
+        <LoginForm />
       </div>
-      <LoginForm />
+       <footer className="py-4">
+        <p className="text-sm text-muted-foreground">Design Aplication By : PELENTUNG</p>
+      </footer>
     </div>
   );
 }

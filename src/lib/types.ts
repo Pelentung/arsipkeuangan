@@ -10,6 +10,7 @@ export interface Contract {
     value: number;
     realization: number;
     remainingValue: number;
+    bills: Bill[];
   }
 
 export interface Bill {

@@ -16,7 +16,7 @@ export function AddContractForm() {
   const { addContract } = useContractContext();
 
   const [value, setValue] = useState(0);
-  const [realization, setRealization] = useState(0);
+  const realization = 0; // Realization starts at 0, managed by bills
   const remainingValue = value - realization;
   
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -53,12 +53,11 @@ export function AddContractForm() {
       const newContract = {
           contractNumber: formData.get('contractNumber') as string,
           contractDate: formData.get('contractDate') as string,
-          addendumNumber: formData.get('addendumNumber') as string || undefined,
-          addendumDate: formData.get('addendumDate') as string || undefined,
+          addendumNumber: (formData.get('addendumNumber') as string) || undefined,
+          addendumDate: (formData.get('addendumDate') as string) || undefined,
           description: formData.get('description') as string,
           implementer: formData.get('implementer') as string,
           value: Number(formData.get('value')),
-          realization: Number(formData.get('realization')) || 0,
           userId: 'local-user', // Placeholder for local storage
       };
 
@@ -128,10 +127,10 @@ export function AddContractForm() {
             <Input 
               id="realization" 
               name="realization" 
-              type="number" 
-              placeholder="0"
-              value={realization}
-              onChange={(e) => setRealization(Number(e.target.value))}
+              type="text"
+              readOnly
+              value={formatCurrency(realization)}
+              className="bg-muted"
             />
         </div>
         <div className="grid gap-2">

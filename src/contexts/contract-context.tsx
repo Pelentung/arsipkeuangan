@@ -13,14 +13,16 @@ type ContractContextType = {
   contracts: Contract[];
   loading: boolean;
   addContract: (
-    newContractData: Omit<Contract, 'id' | 'realization' | 'remainingValue'>
+    newContractData: Omit<Contract, 'id' | 'realization' | 'remainingValue' | 'bills'>
   ) => void;
   updateContract: (
     contractId: string,
-    updatedData: Omit<Contract, 'id' | 'userId'>
+    updatedData: Partial<Omit<Contract, 'id' | 'userId' | 'bills'>>
   ) => void;
   deleteContract: (contractId: string) => void;
   addBill: (contractId: string, bill: Omit<Bill, 'id'>) => void;
+  updateBill: (contractId: string, billId: string, updatedBillData: Omit<Bill, 'id'>) => void;
+  deleteBill: (contractId: string, billId: string) => void;
   getContractById: (contractId: string) => Contract | undefined;
 };
 
@@ -64,15 +66,16 @@ export function useContractContextData(): ContractContextType {
   }, [contracts, loading]);
 
   const addContract = (
-    newContractData: Omit<Contract, 'id' | 'realization' | 'remainingValue'>
+    newContractData: Omit<Contract, 'id' | 'realization' | 'remainingValue' | 'bills'>
   ) => {
     setContracts((prevContracts) => {
+      const realization = newContractData.realization || 0;
       const newContract: Contract = {
         ...newContractData,
         id: new Date().toISOString(), // Simple unique ID
-        realization: newContractData.realization || 0,
-        remainingValue:
-          newContractData.value - (newContractData.realization || 0),
+        realization,
+        remainingValue: newContractData.value - realization,
+        bills: [], // Initialize with an empty bills array
       };
       return [...prevContracts, newContract];
     });
@@ -80,17 +83,16 @@ export function useContractContextData(): ContractContextType {
 
   const updateContract = (
     contractId: string,
-    updatedData: Omit<Contract, 'id' | 'userId'>
+    updatedData: Partial<Omit<Contract, 'id' | 'userId' | 'bills'>>
   ) => {
     setContracts((prevContracts) =>
       prevContracts.map((contract) => {
         if (contract.id === contractId) {
-          const realization =
-            updatedData.realization ?? contract.realization;
-          const remainingValue = updatedData.value - realization;
+          const newContractData = { ...contract, ...updatedData };
+          const realization = newContractData.realization;
+          const remainingValue = newContractData.value - realization;
           return {
-            ...contract,
-            ...updatedData,
+            ...newContractData,
             realization,
             remainingValue,
           };
@@ -106,15 +108,18 @@ export function useContractContextData(): ContractContextType {
     );
   };
 
-  const addBill = (contractId: string, bill: Omit<Bill, 'id'>) => {
+  const addBill = (contractId: string, billData: Omit<Bill, 'id'>) => {
+    const newBill: Bill = { ...billData, id: new Date().toISOString() };
     setContracts((prevContracts) => {
       return prevContracts.map((contract) => {
         if (contract.id === contractId) {
-          const newRealization = contract.realization + bill.amount;
+          const updatedBills = [...(contract.bills || []), newBill];
+          const newRealization = updatedBills.reduce((sum, b) => sum + b.amount, 0);
           const newRemainingValue = contract.value - newRealization;
 
           return {
             ...contract,
+            bills: updatedBills,
             realization: newRealization,
             remainingValue: newRemainingValue,
           };
@@ -122,6 +127,46 @@ export function useContractContextData(): ContractContextType {
         return contract;
       });
     });
+  };
+
+  const updateBill = (contractId: string, billId: string, updatedBillData: Omit<Bill, 'id'>) => {
+    setContracts(prevContracts => 
+      prevContracts.map(contract => {
+        if (contract.id === contractId) {
+          const updatedBills = contract.bills.map(bill => 
+            bill.id === billId ? { ...bill, ...updatedBillData } : bill
+          );
+          const newRealization = updatedBills.reduce((sum, b) => sum + b.amount, 0);
+          const newRemainingValue = contract.value - newRealization;
+          return {
+            ...contract,
+            bills: updatedBills,
+            realization: newRealization,
+            remainingValue: newRemainingValue,
+          };
+        }
+        return contract;
+      })
+    );
+  };
+  
+  const deleteBill = (contractId: string, billId: string) => {
+    setContracts(prevContracts => 
+      prevContracts.map(contract => {
+        if (contract.id === contractId) {
+          const updatedBills = contract.bills.filter(bill => bill.id !== billId);
+          const newRealization = updatedBills.reduce((sum, b) => sum + b.amount, 0);
+          const newRemainingValue = contract.value - newRealization;
+          return {
+            ...contract,
+            bills: updatedBills,
+            realization: newRealization,
+            remainingValue: newRemainingValue,
+          };
+        }
+        return contract;
+      })
+    );
   };
 
   const getContractById = (contractId: string) => {
@@ -135,6 +180,8 @@ export function useContractContextData(): ContractContextType {
     updateContract,
     deleteContract,
     addBill,
+    updateBill,
+    deleteBill,
     getContractById,
   };
 }

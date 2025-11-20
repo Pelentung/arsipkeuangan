@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,8 +21,9 @@ export function EditContractForm({ contract }: EditContractFormProps) {
   const { toast } = useToast();
   const { updateContract } = useContractContext();
 
+  // The value is directly from the contract, no need for local state
   const [value, setValue] = useState(contract.value);
-  const [realization, setRealization] = useState(contract.realization);
+  const realization = contract.realization; // Realization is now managed by bills
   const remainingValue = value - realization;
   
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -69,12 +70,12 @@ export function EditContractForm({ contract }: EditContractFormProps) {
       const updatedData = {
           contractNumber: formData.get('contractNumber') as string,
           contractDate: formData.get('contractDate') as string,
-          addendumNumber: formData.get('addendumNumber') as string || undefined,
-          addendumDate: formData.get('addendumDate') as string || undefined,
+          addendumNumber: (formData.get('addendumNumber') as string) || undefined,
+          addendumDate: (formData.get('addendumDate') as string) || undefined,
           description: formData.get('description') as string,
           implementer: formData.get('implementer') as string,
           value: Number(formData.get('value')),
-          realization: Number(formData.get('realization')) || 0,
+          // Realization is no longer directly editable
       };
 
       updateContract(contract.id, updatedData);
@@ -142,10 +143,10 @@ export function EditContractForm({ contract }: EditContractFormProps) {
             <Input 
               id="realization" 
               name="realization" 
-              type="number" 
-              placeholder="0"
-              value={realization}
-              onChange={(e) => setRealization(Number(e.target.value))}
+              type="text" 
+              readOnly 
+              value={formatCurrency(realization)}
+              className="bg-muted"
             />
         </div>
         <div className="grid gap-2">

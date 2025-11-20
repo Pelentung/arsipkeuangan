@@ -22,25 +22,36 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useRef, useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useContractContext } from '@/contexts/contract-context';
 import type { Bill } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { DropdownMenuItem } from '../ui/dropdown-menu';
+import { format, parseISO } from 'date-fns';
 
-interface AddBillDialogProps {
+interface EditBillDialogProps {
   contractId: string;
-  userId: string;
-  className?: string;
+  bill: Bill;
+  isMenuItem?: boolean;
 }
 
-export function AddBillDialog({ contractId, userId, className }: AddBillDialogProps) {
+export function EditBillDialog({ contractId, bill, isMenuItem = false }: EditBillDialogProps) {
   const [open, setOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { addBill } = useContractContext();
-  const [status, setStatus] = useState<string | undefined>();
+  const { updateBill } = useContractContext();
+  const [status, setStatus] = useState<string | undefined>(bill.status);
+
+  const formatDateForInput = (dateString: string) => {
+    if (!dateString) return '';
+    try {
+      return format(parseISO(dateString), 'yyyy-MM-dd');
+    } catch {
+      return '';
+    }
+  };
 
   const validateForm = (formData: FormData) => {
     const newErrors: Record<string, string> = {};
@@ -69,7 +80,7 @@ export function AddBillDialog({ contractId, userId, className }: AddBillDialogPr
       return;
     }
 
-    const newBill: Omit<Bill, 'id'> = {
+    const updatedBill: Omit<Bill, 'id'> = {
         spmNumber: formData.get('spmNumber') as string,
         spmDate: formData.get('spmDate') as string,
         sp2dNumber: formData.get('sp2dNumber') as string,
@@ -79,66 +90,70 @@ export function AddBillDialog({ contractId, userId, className }: AddBillDialogPr
         status: status as Bill['status'],
     };
     
-    addBill(contractId, newBill);
+    updateBill(contractId, bill.id, updatedBill);
     toast({
         title: 'Sukses',
-        description: 'Tagihan berhasil ditambahkan.',
+        description: 'Tagihan berhasil diperbarui.',
     });
-    formRef.current?.reset();
-    setStatus(undefined);
     setOpen(false);
   };
+
+  const TriggerComponent = isMenuItem ? DropdownMenuItem : Button;
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
         setOpen(isOpen);
         if (!isOpen) {
             setErrors({});
-            setStatus(undefined);
+            setStatus(bill.status);
         }
     }}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className={cn('h-8 w-8 p-0', className)}>
-          <Plus className="h-4 w-4" />
-          <span className="sr-only">Tambah Tagihan</span>
-        </Button>
+        <TriggerComponent 
+            {...(isMenuItem 
+                ? { onSelect: (e) => e.preventDefault() } 
+                : { variant: "ghost", size: "icon", className: "h-8 w-8 p-0" })}
+        >
+          <Edit className={cn("h-4 w-4", isMenuItem && "mr-2")} />
+          {isMenuItem ? 'Ubah Tagihan' : <span className="sr-only">Ubah Tagihan</span>}
+        </TriggerComponent>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Tambah Tagihan Baru</DialogTitle>
+          <DialogTitle>Ubah Tagihan</DialogTitle>
           <DialogDescription>
-            Masukkan detail tagihan untuk memperbarui realisasi kontrak.
+            Perbarui detail tagihan di bawah ini.
           </DialogDescription>
         </DialogHeader>
         <form ref={formRef} onSubmit={handleSubmit} className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto pr-6">
           <div className="grid gap-2">
             <Label htmlFor="spmNumber">Nomor SPM</Label>
-            <Input id="spmNumber" name="spmNumber" />
+            <Input id="spmNumber" name="spmNumber" defaultValue={bill.spmNumber} />
             {errors.spmNumber && <p className="text-sm font-medium text-destructive">{errors.spmNumber}</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="spmDate">Tanggal SPM</Label>
-            <Input id="spmDate" name="spmDate" type="date" />
+            <Input id="spmDate" name="spmDate" type="date" defaultValue={formatDateForInput(bill.spmDate)} />
              {errors.spmDate && <p className="text-sm font-medium text-destructive">{errors.spmDate}</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="sp2dNumber">Nomor SP2D</Label>
-            <Input id="sp2dNumber" name="sp2dNumber" />
+            <Input id="sp2dNumber" name="sp2dNumber" defaultValue={bill.sp2dNumber} />
             {errors.sp2dNumber && <p className="text-sm font-medium text-destructive">{errors.sp2dNumber}</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="sp2dDate">Tanggal SP2D</Label>
-            <Input id="sp2dDate" name="sp2dDate" type="date" />
+            <Input id="sp2dDate" name="sp2dDate" type="date" defaultValue={formatDateForInput(bill.sp2dDate)} />
              {errors.sp2dDate && <p className="text-sm font-medium text-destructive">{errors.sp2dDate}</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="description">Uraian</Label>
-            <Textarea id="description" name="description" placeholder="Cth: Pembayaran termin 1" />
+            <Textarea id="description" name="description" placeholder="Cth: Pembayaran termin 1" defaultValue={bill.description} />
             {errors.description && <p className="text-sm font-medium text-destructive">{errors.description}</p>}
           </div>
            <div className="grid gap-2">
             <Label htmlFor="amount">Jumlah (Rp)</Label>
-            <Input id="amount" name="amount" type="number" placeholder="0" />
+            <Input id="amount" name="amount" type="number" placeholder="0" defaultValue={bill.amount} />
             {errors.amount && <p className="text-sm font-medium text-destructive">{errors.amount}</p>}
           </div>
           <div className="grid gap-2">
@@ -160,7 +175,7 @@ export function AddBillDialog({ contractId, userId, className }: AddBillDialogPr
             <DialogClose asChild>
                 <Button type="button" variant="secondary">Batal</Button>
             </DialogClose>
-            <Button type="submit">Simpan Tagihan</Button>
+            <Button type="submit">Simpan Perubahan</Button>
           </DialogFooter>
         </form>
       </DialogContent>

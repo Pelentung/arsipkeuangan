@@ -18,6 +18,7 @@ import { useRef, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useContractContext } from '@/contexts/contract-context';
+import type { Bill } from '@/lib/types';
 
 interface AddBillDialogProps {
   contractId: string;
@@ -33,9 +34,12 @@ export function AddBillDialog({ contractId, userId }: AddBillDialogProps) {
 
   const validateForm = (formData: FormData) => {
     const newErrors: Record<string, string> = {};
-    if (Number(formData.get('amount')) <= 0) newErrors.amount = 'Jumlah tagihan harus lebih dari 0.';
-    if (!formData.get('billDate')) newErrors.billDate = 'Tanggal tagihan wajib diisi.';
-    if (!formData.get('description')) newErrors.description = 'Deskripsi tagihan wajib diisi.';
+    if (!formData.get('spmNumber')) newErrors.spmNumber = 'Nomor SPM wajib diisi.';
+    if (!formData.get('spmDate')) newErrors.spmDate = 'Tanggal SPM wajib diisi.';
+    if (!formData.get('sp2dNumber')) newErrors.sp2dNumber = 'Nomor SP2D wajib diisi.';
+    if (!formData.get('sp2dDate')) newErrors.sp2dDate = 'Tanggal SP2D wajib diisi.';
+    if (!formData.get('description')) newErrors.description = 'Uraian wajib diisi.';
+    if (Number(formData.get('amount')) <= 0) newErrors.amount = 'Jumlah harus lebih dari 0.';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -54,10 +58,13 @@ export function AddBillDialog({ contractId, userId }: AddBillDialogProps) {
       return;
     }
 
-    const newBill = {
-        amount: Number(formData.get('amount')),
-        billDate: formData.get('billDate') as string,
+    const newBill: Omit<Bill, 'id'> = {
+        spmNumber: formData.get('spmNumber') as string,
+        spmDate: formData.get('spmDate') as string,
+        sp2dNumber: formData.get('sp2dNumber') as string,
+        sp2dDate: formData.get('sp2dDate') as string,
         description: formData.get('description') as string,
+        amount: Number(formData.get('amount')),
     };
     
     addBill(contractId, newBill);
@@ -84,24 +91,39 @@ export function AddBillDialog({ contractId, userId }: AddBillDialogProps) {
             Masukkan detail tagihan untuk memperbarui realisasi kontrak.
           </DialogDescription>
         </DialogHeader>
-        <form ref={formRef} onSubmit={handleSubmit} className="grid gap-4 py-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto pr-6">
           <div className="grid gap-2">
-            <Label htmlFor="amount">Jumlah Tagihan (Rp)</Label>
-            <Input id="amount" name="amount" type="number" placeholder="0" />
-            {errors.amount && <p className="text-sm font-medium text-destructive">{errors.amount}</p>}
+            <Label htmlFor="spmNumber">Nomor SPM</Label>
+            <Input id="spmNumber" name="spmNumber" />
+            {errors.spmNumber && <p className="text-sm font-medium text-destructive">{errors.spmNumber}</p>}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="billDate">Tanggal Tagihan</Label>
-            <Input id="billDate" name="billDate" type="date" />
-             {errors.billDate && <p className="text-sm font-medium text-destructive">{errors.billDate}</p>}
+            <Label htmlFor="spmDate">Tanggal SPM</Label>
+            <Input id="spmDate" name="spmDate" type="date" />
+             {errors.spmDate && <p className="text-sm font-medium text-destructive">{errors.spmDate}</p>}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="description">Deskripsi</Label>
+            <Label htmlFor="sp2dNumber">Nomor SP2D</Label>
+            <Input id="sp2dNumber" name="sp2dNumber" />
+            {errors.sp2dNumber && <p className="text-sm font-medium text-destructive">{errors.sp2dNumber}</p>}
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="sp2dDate">Tanggal SP2D</Label>
+            <Input id="sp2dDate" name="sp2dDate" type="date" />
+             {errors.sp2dDate && <p className="text-sm font-medium text-destructive">{errors.sp2dDate}</p>}
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="description">Uraian</Label>
             <Textarea id="description" name="description" placeholder="Cth: Pembayaran termin 1" />
             {errors.description && <p className="text-sm font-medium text-destructive">{errors.description}</p>}
           </div>
+           <div className="grid gap-2">
+            <Label htmlFor="amount">Jumlah (Rp)</Label>
+            <Input id="amount" name="amount" type="number" placeholder="0" />
+            {errors.amount && <p className="text-sm font-medium text-destructive">{errors.amount}</p>}
+          </div>
 
-          <DialogFooter>
+          <DialogFooter className='mt-4'>
             <DialogClose asChild>
                 <Button type="button" variant="secondary">Batal</Button>
             </DialogClose>

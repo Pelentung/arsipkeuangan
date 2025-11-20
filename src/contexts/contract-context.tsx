@@ -1,13 +1,13 @@
 'use client';
 
-import { Contract } from '@/lib/types';
+import { Contract, Bill } from '@/lib/types';
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 
 type ContractContextType = {
     contracts: Contract[];
     loading: boolean;
     addContract: (newContractData: Omit<Contract, 'id' | 'realization' | 'remainingValue'>) => void;
-    addBill: (contractId: string, bill: { amount: number, billDate: string, description: string }) => void;
+    addBill: (contractId: string, bill: Omit<Bill, 'id'>) => void;
 };
 
 const ContractContext = createContext<ContractContextType | undefined>(undefined);
@@ -59,12 +59,17 @@ export function useContractContextData(): ContractContextType {
         });
     };
 
-    const addBill = (contractId: string, bill: { amount: number, billDate: string, description: string }) => {
+    const addBill = (contractId: string, bill: Omit<Bill, 'id'>) => {
         setContracts(prevContracts => {
             return prevContracts.map(contract => {
                 if (contract.id === contractId) {
                     const newRealization = contract.realization + bill.amount;
                     const newRemainingValue = contract.value - newRealization;
+                    
+                    // Here you would also add the bill itself to a list of bills if you were storing them.
+                    // Since the current data model doesn't store individual bills on the contract,
+                    // we'll just update the financial figures.
+                    
                     return {
                         ...contract,
                         realization: newRealization,

@@ -36,6 +36,10 @@ export default function LaporanPage() {
             alert('Anda harus login untuk mengekspor data.');
             return;
         }
+        if (user.isAnonymous) {
+            alert('Mode tamu tidak dapat mengekspor data.');
+            return;
+        }
         if (contracts.length === 0) {
             alert('Tidak ada data untuk diekspor.');
             return;
@@ -73,7 +77,7 @@ export default function LaporanPage() {
             }
             return contract.bills.map(bill => [
                 escapeCsvCell(contract.contractNumber),
-                escapeCsv-Cell(contract.contractDate),
+                escapeCsvCell(contract.contractDate),
                 escapeCsvCell(contract.implementer),
                 escapeCsvCell(contract.description),
                 escapeCsvCell(contract.value),
@@ -121,7 +125,7 @@ export default function LaporanPage() {
                             Unduh semua data kontrak dan tagihan atau lihat langsung di bawah.
                         </CardDescription>
                     </div>
-                     <Button onClick={handleExport} disabled={!user}>
+                     <Button onClick={handleExport} disabled={!user || user.isAnonymous}>
                         <Download className="mr-2 h-4 w-4" />
                         Ekspor ke CSV
                     </Button>

@@ -13,7 +13,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { useContractContext } from '@/contexts/contract-context';
+import { useUser } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
+import React from 'react';
 
 interface DeleteBillDialogProps {
   contractId: string;
@@ -26,8 +28,18 @@ export function DeleteBillDialog({
 }: DeleteBillDialogProps) {
   const { deleteBill } = useContractContext();
   const { toast } = useToast();
+  const { user } = useUser();
 
-  const handleDelete = () => {
+  const handleDelete = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    if (user?.isAnonymous) {
+      toast({
+        title: 'Akses Ditolak',
+        description: 'Mode tamu tidak dapat menghapus data.',
+        variant: 'destructive',
+      });
+      return;
+    }
     deleteBill(contractId, billId);
     toast({
       title: 'Sukses',
@@ -38,7 +50,7 @@ export function DeleteBillDialog({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={user?.isAnonymous}>
           Hapus Tagihan
         </DropdownMenuItem>
       </AlertDialogTrigger>

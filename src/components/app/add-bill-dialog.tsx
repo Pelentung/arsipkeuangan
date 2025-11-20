@@ -43,12 +43,14 @@ export function AddBillDialog({ contractId, className }: AddBillDialogProps) {
   const { user } = useUser();
   const [status, setStatus] = useState<string | undefined>();
 
+  if (!user || user.isAnonymous) {
+    return null;
+  }
+
   const validateForm = (formData: FormData) => {
     const newErrors: Record<string, string> = {};
     if (!formData.get('spmNumber')) newErrors.spmNumber = 'Nomor SPM wajib diisi.';
     if (!formData.get('spmDate')) newErrors.spmDate = 'Tanggal SPM wajib diisi.';
-    // if (!formData.get('sp2dNumber')) newErrors.sp2dNumber = 'Nomor SP2D wajib diisi.';
-    // if (!formData.get('sp2dDate')) newErrors.sp2dDate = 'Tanggal SP2D wajib diisi.';
     if (!formData.get('description')) newErrors.description = 'Uraian wajib diisi.';
     if (Number(formData.get('amount')) <= 0) newErrors.amount = 'Jumlah harus lebih dari 0.';
     if (!status) newErrors.status = 'Status wajib dipilih.';
@@ -59,8 +61,8 @@ export function AddBillDialog({ contractId, className }: AddBillDialogProps) {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!user) {
-      toast({ title: 'Error', description: 'You must be logged in.', variant: 'destructive' });
+    if (!user || user.isAnonymous) {
+      toast({ title: 'Akses Ditolak', description: 'Mode tamu tidak dapat menambah data.', variant: 'destructive' });
       return;
     }
     const formData = new FormData(event.currentTarget);

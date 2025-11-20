@@ -9,6 +9,7 @@ import { MoreHorizontal } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from '../ui/dropdown-menu';
 import { DeleteBillDialog } from './delete-bill-dialog';
 import { EditBillDialog } from './edit-bill-dialog';
+import { useUser } from '@/firebase';
 
 interface BillTableRowProps {
     bill: Bill;
@@ -16,6 +17,7 @@ interface BillTableRowProps {
 }
 
 export default function BillTableRow({ bill, contractId }: BillTableRowProps) {
+    const { user } = useUser();
     const spmDate = new Date(bill.spmDate);
     const sp2dDate = bill.sp2dDate ? new Date(bill.sp2dDate) : null;
     const formatCurrency = (num: number) => {
@@ -25,6 +27,8 @@ export default function BillTableRow({ bill, contractId }: BillTableRowProps) {
           minimumFractionDigits: 0,
         }).format(num);
       };
+      
+    const isGuest = user?.isAnonymous;
 
     return (
         <TableRow>
@@ -48,23 +52,25 @@ export default function BillTableRow({ bill, contractId }: BillTableRowProps) {
                 {formatCurrency(bill.amount)}
             </TableCell>
             <TableCell className="text-center">
-                <div className="flex items-center justify-center gap-1">
-                    <EditBillDialog contractId={contractId} bill={bill} />
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Buka menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Aksi Tagihan</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <EditBillDialog contractId={contractId} bill={bill} isMenuItem />
-                            <DeleteBillDialog contractId={contractId} billId={bill.id} />
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
+                {!isGuest && (
+                    <div className="flex items-center justify-center gap-1">
+                        <EditBillDialog contractId={contractId} bill={bill} />
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Buka menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Aksi Tagihan</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <EditBillDialog contractId={contractId} bill={bill} isMenuItem />
+                                <DeleteBillDialog contractId={contractId} billId={bill.id} />
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                )}
             </TableCell>
         </TableRow>
     );

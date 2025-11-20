@@ -24,14 +24,10 @@ import {
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { DeleteContractDialog } from './delete-contract-dialog';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
 import BillTableRow from './bill-table-row';
 import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
+import { useUser } from '@/firebase';
 
 interface ContractTableRowProps {
   contract: Contract;
@@ -44,6 +40,7 @@ export default function ContractTableRow({
   isOpen,
   onToggle,
 }: ContractTableRowProps) {
+  const { user } = useUser();
   const contractDate = new Date(contract.contractDate);
 
   const formatCurrency = (num: number) => {
@@ -55,34 +52,34 @@ export default function ContractTableRow({
   };
 
   const status = contract.remainingValue <= 0 ? 'Selesai' : 'Belum Selesai';
+  const isGuest = user?.isAnonymous;
 
   return (
     <>
       <TableRow
-        className="bg-card hover:bg-card/90 cursor-pointer"
-        onClick={onToggle}
+        className="bg-card hover:bg-card/90"
         data-state={isOpen ? 'open' : 'closed'}
       >
-        <TableCell>
+        <TableCell onClick={onToggle} className="cursor-pointer">
           <div className="font-medium">{contract.contractNumber}</div>
           <div className="text-xs text-muted-foreground">
             {format(contractDate, 'd MMM yyyy', { locale: id })}
           </div>
         </TableCell>
-        <TableCell>{contract.implementer}</TableCell>
-        <TableCell>
+        <TableCell onClick={onToggle} className="cursor-pointer">{contract.implementer}</TableCell>
+        <TableCell onClick={onToggle} className="cursor-pointer">
           <p className="max-w-xs truncate">{contract.description}</p>
         </TableCell>
-        <TableCell className="text-right">
+        <TableCell onClick={onToggle} className="text-right cursor-pointer">
           {formatCurrency(contract.value)}
         </TableCell>
-        <TableCell className="text-right">
+        <TableCell onClick={onToggle} className="text-right cursor-pointer">
           {formatCurrency(contract.realization)}
         </TableCell>
-        <TableCell className="text-right font-medium">
+        <TableCell onClick={onToggle} className="text-right font-medium cursor-pointer">
           {formatCurrency(contract.remainingValue)}
         </TableCell>
-        <TableCell className="text-center">
+        <TableCell onClick={onToggle} className="text-center cursor-pointer">
           <Badge
             variant={status === 'Selesai' ? 'default' : 'destructive'}
             className={cn(
@@ -92,7 +89,7 @@ export default function ContractTableRow({
             {status}
           </Badge>
         </TableCell>
-        <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
+        <TableCell className="text-center">
           <div className="flex items-center justify-center gap-1">
             <Button variant="ghost" size="icon" className="h-8 w-8 p-0" onClick={onToggle}>
                 {isOpen ? (
@@ -102,25 +99,29 @@ export default function ContractTableRow({
                 )}
                 <span className="sr-only">Lihat Tagihan</span>
               </Button>
-            <AddBillDialog contractId={contract.id} />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">Buka menu</span>
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Aksi Kontrak</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href={`/ubah-kontrak/${contract.id}`}>
-                    Ubah Kontrak
-                  </Link>
-                </DropdownMenuItem>
-                <DeleteContractDialog contractId={contract.id} />
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {!isGuest && (
+              <>
+                <AddBillDialog contractId={contract.id} />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Buka menu</span>
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Aksi Kontrak</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href={`/ubah-kontrak/${contract.id}`}>
+                        Ubah Kontrak
+                      </Link>
+                    </DropdownMenuItem>
+                    <DeleteContractDialog contractId={contract.id} />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            )}
           </div>
         </TableCell>
       </TableRow>

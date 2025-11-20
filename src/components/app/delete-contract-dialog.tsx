@@ -13,7 +13,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { useContractContext } from '@/contexts/contract-context';
+import { useUser } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
+import React from 'react';
 
 interface DeleteContractDialogProps {
   contractId: string;
@@ -24,8 +26,18 @@ export function DeleteContractDialog({
 }: DeleteContractDialogProps) {
   const { deleteContract } = useContractContext();
   const { toast } = useToast();
+  const { user } = useUser();
 
-  const handleDelete = () => {
+  const handleDelete = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    if (user?.isAnonymous) {
+      toast({
+        title: 'Akses Ditolak',
+        description: 'Mode tamu tidak dapat menghapus data.',
+        variant: 'destructive',
+      });
+      return;
+    }
     deleteContract(contractId);
     toast({
       title: 'Sukses',
@@ -36,7 +48,7 @@ export function DeleteContractDialog({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={user?.isAnonymous}>
           Hapus Kontrak
         </DropdownMenuItem>
       </AlertDialogTrigger>

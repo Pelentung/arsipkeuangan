@@ -22,8 +22,8 @@ export default function UbahKontrakPage() {
   const [contract, setContract] = useState<Contract | null>(null);
 
   useEffect(() => {
-    if (!isUserLoading && !user) {
-      router.push('/');
+    if (!isUserLoading && (!user || user.isAnonymous)) {
+      router.push('/dashboard');
     }
   }, [user, isUserLoading, router]);
 
@@ -35,11 +35,12 @@ export default function UbahKontrakPage() {
     if (foundContract) {
       setContract(foundContract);
     } else {
+      // If contract not found (maybe due to permissions or it doesn't exist), redirect
       router.push('/dashboard');
     }
-  }, [id, getContractById, contractsLoading, router, user, isUserLoading]);
+  }, [id, getContractById, contractsLoading, router, user]);
 
-  if (isUserLoading || contractsLoading || !contract) {
+  if (isUserLoading || contractsLoading || !user || user.isAnonymous || !contract) {
     return <p>Memuat data kontrak...</p>;
   }
 

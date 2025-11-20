@@ -59,26 +59,36 @@ export default function ContractTableRow({
         className="bg-card hover:bg-card/90"
         data-state={isOpen ? 'open' : 'closed'}
       >
-        <TableCell onClick={onToggle} className="cursor-pointer">
+        <TableCell onClick={onToggle} className="cursor-pointer align-top">
           <div className="font-medium">{contract.contractNumber}</div>
           <div className="text-xs text-muted-foreground">
             {format(contractDate, 'd MMM yyyy', { locale: id })}
           </div>
+          {contract.addendums && contract.addendums.length > 0 && (
+            <div className="mt-2 text-xs text-muted-foreground space-y-1">
+              <div className='font-semibold'>Addendum:</div>
+              {contract.addendums.map((addendum, index) => (
+                <div key={index}>
+                  {addendum.number} ({format(new Date(addendum.date), 'd MMM yyyy', { locale: id })})
+                </div>
+              ))}
+            </div>
+          )}
         </TableCell>
-        <TableCell onClick={onToggle} className="cursor-pointer">{contract.implementer}</TableCell>
-        <TableCell onClick={onToggle} className="cursor-pointer">
+        <TableCell onClick={onToggle} className="cursor-pointer align-top">{contract.implementer}</TableCell>
+        <TableCell onClick={onToggle} className="cursor-pointer align-top">
           <p className="max-w-xs truncate">{contract.description}</p>
         </TableCell>
-        <TableCell onClick={onToggle} className="text-right cursor-pointer">
+        <TableCell onClick={onToggle} className="text-right cursor-pointer align-top">
           {formatCurrency(contract.value)}
         </TableCell>
-        <TableCell onClick={onToggle} className="text-right cursor-pointer">
+        <TableCell onClick={onToggle} className="text-right cursor-pointer align-top">
           {formatCurrency(contract.realization)}
         </TableCell>
-        <TableCell onClick={onToggle} className="text-right font-medium cursor-pointer">
+        <TableCell onClick={onToggle} className="text-right font-medium cursor-pointer align-top">
           {formatCurrency(contract.remainingValue)}
         </TableCell>
-        <TableCell onClick={onToggle} className="text-center cursor-pointer">
+        <TableCell onClick={onToggle} className="text-center cursor-pointer align-top">
           <Badge
             variant={status === 'Selesai' ? 'default' : 'destructive'}
             className={cn(
@@ -88,7 +98,7 @@ export default function ContractTableRow({
             {status}
           </Badge>
         </TableCell>
-        <TableCell className="text-center">
+        <TableCell className="text-center align-top">
           <div className="flex items-center justify-center gap-1">
             <Button variant="ghost" size="icon" className="h-8 w-8 p-0" onClick={onToggle}>
                 {isOpen ? (

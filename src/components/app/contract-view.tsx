@@ -69,7 +69,7 @@ export function ContractView() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[200px]">Nomor Kontrak</TableHead>
+                <TableHead className="w-[250px]">Nomor Kontrak & Addendum</TableHead>
                 <TableHead>Pelaksana</TableHead>
                 <TableHead>Uraian</TableHead>
                 <TableHead className="text-right">Nilai</TableHead>

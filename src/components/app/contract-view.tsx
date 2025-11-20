@@ -7,23 +7,26 @@ import { ContractCard } from '@/components/app/contract-card';
 import { Skeleton } from '../ui/skeleton';
 import { Search } from 'lucide-react';
 import Link from 'next/link';
+import { useContractContext } from '@/contexts/contract-context';
 
-interface ContractViewProps {
-  initialContracts: Contract[];
-}
-
-export function ContractView({ initialContracts }: ContractViewProps) {
+export function ContractView() {
   const [searchTerm, setSearchTerm] = useState('');
+  const { contracts, loading } = useContractContext();
 
   const filteredContracts = useMemo(() => {
-    if (!searchTerm) return initialContracts;
-    return initialContracts.filter(
+    if (!contracts) return [];
+    if (!searchTerm) return contracts;
+    return contracts.filter(
       (contract) =>
         contract.contractNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
         contract.implementer.toLowerCase().includes(searchTerm.toLowerCase()) ||
         contract.description.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [initialContracts, searchTerm]);
+  }, [contracts, searchTerm]);
+
+  if (loading) {
+    return <ContractViewSkeleton />;
+  }
 
   return (
     <div className="flex flex-col h-full mt-8">

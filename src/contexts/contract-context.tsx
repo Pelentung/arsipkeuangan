@@ -1,9 +1,11 @@
 'use client';
 
 import { Contract } from '@/lib/types';
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 
 type ContractContextType = {
+    contracts: Contract[];
+    loading: boolean;
     addContract: (newContractData: Omit<Contract, 'id' | 'realization' | 'remainingValue'>) => void;
     addBill: (contractId: string, bill: { amount: number, billDate: string, description: string }) => void;
 };
@@ -18,16 +20,71 @@ export function useContractContext() {
     return context;
 }
 
-interface ContractProviderProps {
-    children: ReactNode;
-    onAddContract: (newContractData: Omit<Contract, 'id' | 'realization' | 'remainingValue'>) => void;
-    onAddBill: (contractId: string, bill: { amount: number, billDate: string, description: string }) => void;
+export function useContractContextData(): ContractContextType {
+    const [contracts, setContracts] = useState<Contract[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        try {
+            const savedContracts = localStorage.getItem('contracts');
+            if (savedContracts) {
+                setContracts(JSON.parse(savedContracts));
+            }
+        } catch (error) {
+            console.error("Failed to load contracts from localStorage", error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!loading) {
+            try {
+                localStorage.setItem('contracts', JSON.stringify(contracts));
+            } catch (error) {
+                console.error("Failed to save contracts to localStorage", error);
+            }
+        }
+    }, [contracts, loading]);
+
+    const addContract = (newContractData: Omit<Contract, 'id' | 'realization' | 'remainingValue'>) => {
+        setContracts(prevContracts => {
+            const newContract: Contract = {
+                ...newContractData,
+                id: new Date().toISOString(), // Simple unique ID
+                realization: newContractData.realization || 0,
+                remainingValue: newContractData.value - (newContractData.realization || 0),
+            };
+            return [...prevContracts, newContract];
+        });
+    };
+
+    const addBill = (contractId: string, bill: { amount: number, billDate: string, description: string }) => {
+        setContracts(prevContracts => {
+            return prevContracts.map(contract => {
+                if (contract.id === contractId) {
+                    const newRealization = contract.realization + bill.amount;
+                    const newRemainingValue = contract.value - newRealization;
+                    return {
+                        ...contract,
+                        realization: newRealization,
+                        remainingValue: newRemainingValue,
+                    };
+                }
+                return contract;
+            });
+        });
+    };
+
+    return { contracts, loading, addContract, addBill };
 }
 
-export function ContractProvider({ children, onAddContract, onAddBill }: ContractProviderProps) {
-    const value = {
-        addContract: onAddContract,
-        addBill: onAddBill,
-    };
+
+interface ContractProviderProps {
+    children: ReactNode;
+    value: ContractContextType;
+}
+
+export function ContractProvider({ children, value }: ContractProviderProps) {
     return <ContractContext.Provider value={value}>{children}</ContractContext.Provider>;
 }

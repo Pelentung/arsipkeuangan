@@ -1,86 +1,35 @@
 'use client';
 
-import { AppSidebar } from '@/components/app/app-sidebar';
 import { ContractView } from '@/components/app/contract-view';
-import { Suspense, useEffect, useMemo, useState } from 'react';
-import type { Contract } from '@/lib/types';
+import { Suspense, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Coins, Receipt, Wallet, PlusCircle } from 'lucide-react';
 import { ContractStatusChart } from '@/components/app/contract-status-chart';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ContractProvider } from '@/contexts/contract-context';
+import { useContractContext } from '@/contexts/contract-context';
 
 function Dashboard() {
-  const [contracts, setContracts] = useState<Contract[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    try {
-      const savedContracts = localStorage.getItem('contracts');
-      if (savedContracts) {
-        setContracts(JSON.parse(savedContracts));
-      }
-    } catch (error) {
-      console.error("Failed to load contracts from localStorage", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if(!loading) {
-      try {
-        localStorage.setItem('contracts', JSON.stringify(contracts));
-      } catch (error) {
-        console.error("Failed to save contracts to localStorage", error);
-      }
-    }
-  }, [contracts, loading]);
-
-  const handleAddContract = (newContractData: Omit<Contract, 'id' | 'realization' | 'remainingValue'>) => {
-    setContracts(prevContracts => {
-      const newContract: Contract = {
-        ...newContractData,
-        id: new Date().toISOString(), // Simple unique ID
-        realization: newContractData.realization || 0,
-        remainingValue: newContractData.value - (newContractData.realization || 0),
-      };
-      return [...prevContracts, newContract];
-    });
-  };
-
-  const handleAddBill = (contractId: string, bill: { amount: number, billDate: string, description: string }) => {
-    setContracts(prevContracts => {
-      return prevContracts.map(contract => {
-        if (contract.id === contractId) {
-          const newRealization = contract.realization + bill.amount;
-          const newRemainingValue = contract.value - newRealization;
-          return {
-            ...contract,
-            realization: newRealization,
-            remainingValue: newRemainingValue,
-          };
-        }
-        return contract;
-      });
-    });
-  };
+  const { contracts, loading } = useContractContext();
 
   const summary = useMemo(() => {
+    if (loading || !contracts) {
+      return { total: 0, totalValue: 0, totalRealization: 0, totalRemaining: 0 };
+    }
     const total = contracts.length;
     const totalValue = contracts.reduce((sum, c) => sum + c.value, 0);
     const totalRealization = contracts.reduce((sum, c) => sum + c.realization, 0);
     const totalRemaining = totalValue - totalRealization;
 
     return { total, totalValue, totalRealization, totalRemaining };
-  }, [contracts]);
+  }, [contracts, loading]);
 
   const formatCurrency = (num: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
   };
   
   const chartData = useMemo(() => {
+     if (loading || !contracts) return [];
      const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
      const monthlyData: { [key: string]: { nilai: number, realisasi: number } } = {};
 
@@ -99,14 +48,14 @@ function Dashboard() {
      });
 
     return Object.entries(monthlyData).map(([month, data]) => ({ month, ...data }));
-  }, [contracts]);
+  }, [contracts, loading]);
 
   if (loading) {
     return <p>Memuat data lokal...</p>;
   }
 
   return (
-    <ContractProvider onAddContract={handleAddContract} onAddBill={handleAddBill}>
+    <>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
             <h1 className="text-2xl font-bold tracking-tight">Dasbor</h1>
@@ -170,20 +119,17 @@ function Dashboard() {
         </CardContent>
       </Card>
 
-      <ContractView initialContracts={contracts} />
-    </ContractProvider>
+      <ContractView />
+    </>
   );
 }
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen w-full bg-background">
-      <AppSidebar />
       <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
         <Suspense fallback={<p>Memuat...</p>}>
           <Dashboard />
         </Suspense>
       </main>
-    </div>
   );
 }

@@ -18,7 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useFirebaseApp, useUser } from '@/firebase';
-import { AppIcon } from '@/components/app/app-icon';
+import Image from 'next/image';
 
 function LoginForm() {
   const firebaseApp = useFirebaseApp();
@@ -113,9 +113,20 @@ export default function WelcomePage() {
   
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
-      <div className="flex items-center gap-3 mb-6">
-        <AppIcon className="w-8 h-8 text-primary" />
-        <h1 className="text-2xl font-headline font-bold">ARSIP DATA KONTRAK</h1>
+      <div className="flex flex-col items-center gap-4 mb-6">
+        <Image 
+          src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Logo_Kota_Medan_%28Seal_of_Medan%29.svg/500px-Logo_Kota_Medan_%28Seal_of_Medan%29.svg.png?20190418174340"
+          alt="Logo Kota Medan"
+          width={100}
+          height={100}
+          className='mb-4'
+        />
+        <div className="w-full max-w-md overflow-hidden">
+             <p className="font-headline text-lg font-semibold whitespace-nowrap animate-marquee text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-blue-600">
+                Dinas Perumahan Kawasan Permukiman Cipta Karya dan Tata Ruang Kota Medan
+            </p>
+        </div>
+        <h1 className="text-2xl font-headline font-bold text-center">ARSIP DATA KONTRAK</h1>
       </div>
       <LoginForm />
     </div>

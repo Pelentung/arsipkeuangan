@@ -19,7 +19,7 @@ export function EditContractForm({ contract }: EditContractFormProps) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
-  const { updateContract } = useContractContext();
+  const { updateContract, contracts } = useContractContext();
 
   const [value, setValue] = useState(contract.value);
   const realization = contract.realization;
@@ -46,7 +46,23 @@ export function EditContractForm({ contract }: EditContractFormProps) {
   
   const validateForm = (formData: FormData) => {
       const newErrors: Record<string, string> = {};
-      if (!formData.get('contractNumber')) newErrors.contractNumber = 'Nomor kontrak wajib diisi.';
+      const contractNumber = formData.get('contractNumber') as string;
+
+      if (!contractNumber) newErrors.contractNumber = 'Nomor kontrak wajib diisi.';
+      
+      const isDuplicate = contracts.some(
+        c => c.contractNumber === contractNumber && c.id !== contract.id
+      );
+
+      if (isDuplicate) {
+          toast({
+              title: 'Gagal Menyimpan',
+              description: 'Nomor kontrak sudah ada. Silakan gunakan nomor lain.',
+              variant: 'destructive'
+          });
+          return false;
+      }
+      
       if (!formData.get('contractDate')) newErrors.contractDate = 'Tanggal kontrak wajib diisi.';
       if (!formData.get('description')) newErrors.description = 'Uraian wajib diisi.';
       if (!formData.get('implementer')) newErrors.implementer = 'Pelaksana wajib diisi.';
@@ -61,11 +77,13 @@ export function EditContractForm({ contract }: EditContractFormProps) {
       const formData = new FormData(event.currentTarget);
       
       if (!validateForm(formData)) {
-          toast({
-              title: 'Kesalahan Validasi',
-              description: 'Silakan periksa kembali isian Anda.',
-              variant: 'destructive'
-          });
+          if (Object.keys(errors).length > 0) {
+            toast({
+                title: 'Kesalahan Validasi',
+                description: 'Silakan periksa kembali isian Anda.',
+                variant: 'destructive'
+            });
+          }
           return;
       }
       
@@ -80,12 +98,8 @@ export function EditContractForm({ contract }: EditContractFormProps) {
       const addendumNumber = formData.get('addendumNumber') as string;
       const addendumDate = formData.get('addendumDate') as string;
 
-      if (addendumNumber) {
-        updatedData.addendumNumber = addendumNumber;
-      }
-      if (addendumDate) {
-        updatedData.addendumDate = addendumDate;
-      }
+      updatedData.addendumNumber = addendumNumber || undefined;
+      updatedData.addendumDate = addendumDate || undefined;
 
       updateContract(contract.id, updatedData);
       

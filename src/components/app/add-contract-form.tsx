@@ -14,7 +14,7 @@ export function AddContractForm() {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
-  const { addContract } = useContractContext();
+  const { addContract, contracts } = useContractContext();
   const { user } = useUser();
 
   const [value, setValue] = useState(0);
@@ -29,7 +29,17 @@ export function AddContractForm() {
   
   const validateForm = (formData: FormData) => {
       const newErrors: Record<string, string> = {};
-      if (!formData.get('contractNumber')) newErrors.contractNumber = 'Nomor kontrak wajib diisi.';
+      const contractNumber = formData.get('contractNumber') as string;
+
+      if (!contractNumber) newErrors.contractNumber = 'Nomor kontrak wajib diisi.';
+      if (contracts.some(c => c.contractNumber === contractNumber)) {
+          toast({
+              title: 'Gagal Menyimpan',
+              description: 'Nomor kontrak sudah ada. Silakan gunakan nomor lain.',
+              variant: 'destructive'
+          });
+          return false;
+      }
       if (!formData.get('contractDate')) newErrors.contractDate = 'Tanggal kontrak wajib diisi.';
       if (!formData.get('description')) newErrors.description = 'Uraian wajib diisi.';
       if (!formData.get('implementer')) newErrors.implementer = 'Pelaksana wajib diisi.';
@@ -53,11 +63,13 @@ export function AddContractForm() {
       const formData = new FormData(event.currentTarget);
       
       if (!validateForm(formData)) {
-          toast({
-              title: 'Kesalahan Validasi',
-              description: 'Silakan periksa kembali isian Anda.',
-              variant: 'destructive'
-          });
+          if (Object.keys(errors).length > 0) {
+            toast({
+                title: 'Kesalahan Validasi',
+                description: 'Silakan periksa kembali isian Anda.',
+                variant: 'destructive'
+            });
+          }
           return;
       }
       

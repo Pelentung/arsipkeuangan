@@ -1,21 +1,15 @@
+import Image from 'next/image';
 import type { SVGProps } from 'react';
 
-export function AppIcon(props: SVGProps<SVGSVGElement>) {
+export function AppIcon(props: Omit<SVGProps<SVGSVGElement>, 'width' | 'height'> & { width?: number; height?: number }) {
+  const { width = 24, height = 24, ...rest } = props;
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-      <polyline points="14 2 14 8 20 8" />
-      <path d="M12 18v-6" />
-      <path d="M9 15h6" />
-    </svg>
+    <Image
+      src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Logo_Kota_Medan_%28Seal_of_Medan%29.svg/500px-Logo_Kota_Medan_%28Seal_of_Medan%29.svg.png?20190418174340"
+      alt="Logo Kota Medan"
+      width={width}
+      height={height}
+      {...rest}
+    />
   );
 }

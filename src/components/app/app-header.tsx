@@ -73,7 +73,7 @@ export function AppHeader() {
           </SheetTrigger>
           <SheetContent side="left" className="w-64 p-0 flex flex-col">
             <div className="flex items-center gap-2 h-16 border-b px-6">
-                <AppIcon className="w-6 h-6 text-primary" />
+                <AppIcon width={28} height={28} />
                 <span className="font-semibold font-headline text-lg">ARSIP DATA KONTRAK</span>
             </div>
             <nav className="grid gap-2 text-lg font-medium p-4 flex-1">
@@ -81,9 +81,9 @@ export function AppHeader() {
             </nav>
           </SheetContent>
         </Sheet>
-         <div className="hidden md:flex items-center gap-2 font-semibold">
-           <AppIcon className="w-6 h-6 text-primary" />
-          <span className="font-semibold font-headline">ARSIP DATA KONTRAK</span>
+         <div className="hidden md:flex items-center gap-3 font-semibold">
+           <AppIcon width={32} height={32} />
+          <span className="font-semibold font-headline text-lg">ARSIP DATA KONTRAK</span>
         </div>
       </div>
       

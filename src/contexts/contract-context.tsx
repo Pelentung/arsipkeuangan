@@ -8,7 +8,7 @@ import {
   useCallback,
   useMemo,
 } from 'react';
-import { useFirestore, useUser, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirestore, useUser, useMemoFirebase, useCollection } from '@/firebase';
 import {
   collection,
   doc,
@@ -97,7 +97,7 @@ export function useContractContextData(): ContractContextType {
       bills: contract.bills?.map((bill: any) => ({
           ...bill,
           spmDate: fromTimestamp(bill.spmDate),
-          sp2dDate: fromTimestamp(bill.sp2dDate),
+          sp2dDate: bill.sp2dDate ? fromTimestamp(bill.sp2dDate) : undefined,
       })) || [],
     }));
   }, [contractsData]);
@@ -182,17 +182,19 @@ export function useContractContextData(): ContractContextType {
     const newRemainingValue = originalContract.value - newRealization;
 
     const dataToUpdate = {
-        bills: updatedBills,
+        bills: updatedBills.map(removeUndefinedProps), // Clean each bill object
         realization: newRealization,
         remainingValue: newRemainingValue,
         updatedAt: serverTimestamp(),
     };
 
-    updateDoc(contractDocRef, dataToUpdate).catch(async (serverError) => {
+    const cleanedData = removeUndefinedProps(dataToUpdate);
+
+    updateDoc(contractDocRef, cleanedData).catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
             path: contractDocRef.path,
             operation: 'update',
-            requestResourceData: dataToUpdate,
+            requestResourceData: cleanedData,
         });
         errorEmitter.emit('permission-error', permissionError);
     });
@@ -212,17 +214,19 @@ export function useContractContextData(): ContractContextType {
     const newRemainingValue = originalContract.value - newRealization;
     
     const dataToUpdate = {
-        bills: updatedBills,
+        bills: updatedBills.map(removeUndefinedProps), // Clean each bill object
         realization: newRealization,
         remainingValue: newRemainingValue,
         updatedAt: serverTimestamp(),
     };
 
-    updateDoc(contractDocRef, dataToUpdate).catch(async (serverError) => {
+    const cleanedData = removeUndefinedProps(dataToUpdate);
+
+    updateDoc(contractDocRef, cleanedData).catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
             path: contractDocRef.path,
             operation: 'update',
-            requestResourceData: dataToUpdate,
+            requestResourceData: cleanedData,
         });
         errorEmitter.emit('permission-error', permissionError);
     });
@@ -239,17 +243,19 @@ export function useContractContextData(): ContractContextType {
     const newRemainingValue = originalContract.value - newRealization;
 
      const dataToUpdate = {
-        bills: updatedBills,
+        bills: updatedBills, // Already cleaned as part of add/update
         realization: newRealization,
         remainingValue: newRemainingValue,
         updatedAt: serverTimestamp(),
     };
 
-    updateDoc(contractDocRef, dataToUpdate).catch(async (serverError) => {
+    const cleanedData = removeUndefinedProps(dataToUpdate);
+
+    updateDoc(contractDocRef, cleanedData).catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
             path: contractDocRef.path,
             operation: 'update',
-            requestResourceData: dataToUpdate,
+            requestResourceData: cleanedData,
         });
         errorEmitter.emit('permission-error', permissionError);
     });
@@ -284,3 +290,5 @@ export function ContractProvider({ children, value }: ContractProviderProps) {
     </ContractContext.Provider>
   );
 }
+
+    

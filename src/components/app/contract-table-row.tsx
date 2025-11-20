@@ -132,7 +132,7 @@ export default function ContractTableRow({
       </TableRow>
       <TableRow className={cn(!isOpen && 'hidden')}>
           <TableCell colSpan={8} className="p-0">
-            <div className="p-4 bg-muted/50">
+            <div className="p-4 bg-muted">
               <h4 className="font-semibold mb-2">Detail Tagihan</h4>
               {contract.bills && contract.bills.length > 0 ? (
                 <div className="rounded-md border bg-card">

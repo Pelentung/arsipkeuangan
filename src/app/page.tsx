@@ -121,8 +121,8 @@ export default function WelcomePage() {
           height={100}
           className='mb-4'
         />
-        <div className="w-full max-w-md">
-             <p className="font-headline text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-blue-600">
+        <div className="relative flex w-full max-w-md overflow-x-hidden">
+             <p className="whitespace-nowrap animate-marquee font-headline text-lg font-semibold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-blue-600">
                 Dinas Perumahan Kawasan Permukiman Cipta Karya dan Tata Ruang Kota Medan
             </p>
         </div>

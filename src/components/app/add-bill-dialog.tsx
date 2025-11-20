@@ -47,8 +47,8 @@ export function AddBillDialog({ contractId, className }: AddBillDialogProps) {
     const newErrors: Record<string, string> = {};
     if (!formData.get('spmNumber')) newErrors.spmNumber = 'Nomor SPM wajib diisi.';
     if (!formData.get('spmDate')) newErrors.spmDate = 'Tanggal SPM wajib diisi.';
-    if (!formData.get('sp2dNumber')) newErrors.sp2dNumber = 'Nomor SP2D wajib diisi.';
-    if (!formData.get('sp2dDate')) newErrors.sp2dDate = 'Tanggal SP2D wajib diisi.';
+    // if (!formData.get('sp2dNumber')) newErrors.sp2dNumber = 'Nomor SP2D wajib diisi.';
+    // if (!formData.get('sp2dDate')) newErrors.sp2dDate = 'Tanggal SP2D wajib diisi.';
     if (!formData.get('description')) newErrors.description = 'Uraian wajib diisi.';
     if (Number(formData.get('amount')) <= 0) newErrors.amount = 'Jumlah harus lebih dari 0.';
     if (!status) newErrors.status = 'Status wajib dipilih.';
@@ -77,8 +77,8 @@ export function AddBillDialog({ contractId, className }: AddBillDialogProps) {
     const newBill: Omit<Bill, 'id'> = {
         spmNumber: formData.get('spmNumber') as string,
         spmDate: formData.get('spmDate') as string,
-        sp2dNumber: formData.get('sp2dNumber') as string,
-        sp2dDate: formData.get('sp2dDate') as string,
+        sp2dNumber: (formData.get('sp2dNumber') as string) || undefined,
+        sp2dDate: (formData.get('sp2dDate') as string) || undefined,
         description: formData.get('description') as string,
         amount: Number(formData.get('amount')),
         status: status as Bill['status'],
@@ -127,12 +127,12 @@ export function AddBillDialog({ contractId, className }: AddBillDialogProps) {
              {errors.spmDate && <p className="text-sm font-medium text-destructive">{errors.spmDate}</p>}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="sp2dNumber">Nomor SP2D</Label>
+            <Label htmlFor="sp2dNumber">Nomor SP2D (Opsional)</Label>
             <Input id="sp2dNumber" name="sp2dNumber" />
             {errors.sp2dNumber && <p className="text-sm font-medium text-destructive">{errors.sp2dNumber}</p>}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="sp2dDate">Tanggal SP2D</Label>
+            <Label htmlFor="sp2dDate">Tanggal SP2D (Opsional)</Label>
             <Input id="sp2dDate" name="sp2dDate" type="date" />
              {errors.sp2dDate && <p className="text-sm font-medium text-destructive">{errors.sp2dDate}</p>}
           </div>

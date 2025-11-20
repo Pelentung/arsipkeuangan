@@ -31,12 +31,16 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async () => {
+  // This should not be async. The redirect is handled by the useUser hook
+  // which listens for auth state changes.
+  const handleLogin = () => {
     setIsLoading(true);
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push('/');
-    } catch (error: any) {
+    signInWithEmailAndPassword(auth, email, password)
+    .then(() => {
+        // The redirect is handled by the useUser hook in the layout
+        router.push('/');
+    })
+    .catch((error: any) => {
       toast({
         title: 'Gagal Login',
         description:
@@ -45,25 +49,31 @@ export default function LoginPage() {
             : 'Terjadi kesalahan saat mencoba masuk.',
         variant: 'destructive',
       });
-    } finally {
+    })
+    .finally(() => {
       setIsLoading(false);
-    }
+    });
   };
 
-  const handleAnonymousLogin = async () => {
+  // This should not be async. The redirect is handled by the useUser hook
+  // which listens for auth state changes.
+  const handleAnonymousLogin = () => {
     setIsLoading(true);
-    try {
-      await signInAnonymously(auth);
-      router.push('/');
-    } catch (error) {
-       toast({
-        title: 'Gagal Login Anonim',
-        description: 'Terjadi kesalahan saat mencoba masuk sebagai tamu.',
-        variant: 'destructive',
-      });
-    } finally {
+    signInAnonymously(auth)
+      .then(() => {
+          // The redirect is handled by the useUser hook in the layout
+          router.push('/');
+      })
+      .catch((error) => {
+        toast({
+          title: 'Gagal Login Anonim',
+          description: 'Terjadi kesalahan saat mencoba masuk sebagai tamu.',
+          variant: 'destructive',
+        });
+      })
+      .finally(() => {
         setIsLoading(false);
-    }
+      });
   };
 
   return (

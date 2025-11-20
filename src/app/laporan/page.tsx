@@ -47,6 +47,8 @@ export default function LaporanPage() {
         const headers = [
             'Nomor Kontrak',
             'Tanggal Kontrak',
+            'Nomor Addendum',
+            'Tanggal Addendum',
             'Pelaksana',
             'Uraian Kontrak',
             'Nilai Kontrak (Rp)',
@@ -62,10 +64,15 @@ export default function LaporanPage() {
         ];
 
         const rows = contracts.flatMap(contract => {
+            const addendumNumbers = contract.addendums?.map(a => a.number).join(', ') || '';
+            const addendumDates = contract.addendums?.map(a => a.date).join(', ') || '';
+
             if (!contract.bills || contract.bills.length === 0) {
                 return [[
                     escapeCsvCell(contract.contractNumber),
                     escapeCsvCell(contract.contractDate),
+                    escapeCsvCell(addendumNumbers),
+                    escapeCsvCell(addendumDates),
                     escapeCsvCell(contract.implementer),
                     escapeCsvCell(contract.description),
                     escapeCsvCell(contract.value),
@@ -77,6 +84,8 @@ export default function LaporanPage() {
             return contract.bills.map(bill => [
                 escapeCsvCell(contract.contractNumber),
                 escapeCsvCell(contract.contractDate),
+                escapeCsvCell(addendumNumbers),
+                escapeCsvCell(addendumDates),
                 escapeCsvCell(contract.implementer),
                 escapeCsvCell(contract.description),
                 escapeCsvCell(contract.value),

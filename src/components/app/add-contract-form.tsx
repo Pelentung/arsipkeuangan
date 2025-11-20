@@ -9,6 +9,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useRouter } from 'next/navigation';
 import { useContractContext } from '@/contexts/contract-context';
 import { useUser } from '@/firebase';
+import type { Addendum } from '@/lib/types';
+import { PlusCircle, Trash2 } from 'lucide-react';
 
 export function AddContractForm() {
   const router = useRouter();
@@ -22,11 +24,27 @@ export function AddContractForm() {
   const remainingValue = value - realization;
   
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [addendums, setAddendums] = useState<Partial<Addendum>[]>([{ number: '', date: '' }]);
 
   const formatCurrency = (num: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
   };
   
+  const handleAddendumChange = (index: number, field: keyof Addendum, value: string) => {
+    const newAddendums = [...addendums];
+    newAddendums[index] = { ...newAddendums[index], [field]: value };
+    setAddendums(newAddendums);
+  };
+
+  const addAddendumRow = () => {
+    setAddendums([...addendums, { number: '', date: '' }]);
+  };
+
+  const removeAddendumRow = (index: number) => {
+    const newAddendums = addendums.filter((_, i) => i !== index);
+    setAddendums(newAddendums);
+  };
+
   const validateForm = (formData: FormData) => {
       const newErrors: Record<string, string> = {};
       const contractNumber = formData.get('contractNumber') as string;
@@ -73,23 +91,21 @@ export function AddContractForm() {
           return;
       }
       
+      const filteredAddendums = addendums
+        .filter(addendum => addendum.number && addendum.date)
+        .map(addendum => ({
+            number: addendum.number!,
+            date: addendum.date!
+        }));
+
       const newContract: any = {
           contractNumber: formData.get('contractNumber') as string,
           contractDate: formData.get('contractDate') as string,
           description: formData.get('description') as string,
           implementer: formData.get('implementer') as string,
           value: Number(formData.get('value')),
+          addendums: filteredAddendums.length > 0 ? filteredAddendums : [],
       };
-
-      const addendumNumber = formData.get('addendumNumber') as string;
-      const addendumDate = formData.get('addendumDate') as string;
-
-      if (addendumNumber) {
-        newContract.addendumNumber = addendumNumber;
-      }
-      if (addendumDate) {
-        newContract.addendumDate = addendumDate;
-      }
 
       addContract(newContract);
       toast({
@@ -116,15 +132,50 @@ export function AddContractForm() {
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="grid gap-2">
-            <Label htmlFor="addendumNumber">Nomor Addendum</Label>
-            <Input id="addendumNumber" name="addendumNumber" placeholder="Opsional" />
-        </div>
-        <div className="grid gap-2">
-            <Label htmlFor="addendumDate">Tanggal Addendum</Label>
-            <Input id="addendumDate" name="addendumDate" type="date" />
-        </div>
+      <div className="grid gap-4">
+        <Label>Addendum (Opsional)</Label>
+        {addendums.map((addendum, index) => (
+          <div key={index} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] items-end gap-2 p-3 border rounded-lg bg-muted/50">
+            <div className="grid gap-2">
+              <Label htmlFor={`addendumNumber-${index}`} className="text-xs">Nomor Addendum {index + 1}</Label>
+              <Input
+                id={`addendumNumber-${index}`}
+                name={`addendumNumber-${index}`}
+                placeholder="Nomor Addendum"
+                value={addendum.number || ''}
+                onChange={(e) => handleAddendumChange(index, 'number', e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+               <Label htmlFor={`addendumDate-${index}`} className="text-xs">Tanggal Addendum {index + 1}</Label>
+              <Input
+                id={`addendumDate-${index}`}
+                name={`addendumDate-${index}`}
+                type="date"
+                value={addendum.date || ''}
+                onChange={(e) => handleAddendumChange(index, 'date', e.target.value)}
+              />
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="text-destructive hover:bg-destructive/10"
+              onClick={() => removeAddendumRow(index)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+        <Button
+          type="button"
+          variant="outline"
+          onClick={addAddendumRow}
+          className="w-full"
+        >
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Tambah Addendum
+        </Button>
       </div>
 
       <div className="grid gap-2">

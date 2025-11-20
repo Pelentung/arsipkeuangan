@@ -1,12 +1,16 @@
 import type { Timestamp } from 'firebase/firestore';
 
+export interface Addendum {
+  number: string;
+  date: string;
+}
+
 export interface Contract {
     id: string;
     userId: string;
     contractNumber: string;
     contractDate: string; // Storing as ISO string
-    addendumNumber?: string;
-    addendumDate?: string; // Storing as ISO string
+    addendums?: Addendum[];
     description: string;
     implementer: string;
     value: number;

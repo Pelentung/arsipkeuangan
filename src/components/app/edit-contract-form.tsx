@@ -8,8 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useRouter } from 'next/navigation';
 import { useContractContext } from '@/contexts/contract-context';
-import type { Contract } from '@/lib/types';
+import type { Contract, Addendum } from '@/lib/types';
 import { format, parseISO } from 'date-fns';
+import { PlusCircle, Trash2 } from 'lucide-react';
 
 interface EditContractFormProps {
   contract: Contract;
@@ -26,6 +27,7 @@ export function EditContractForm({ contract }: EditContractFormProps) {
   const remainingValue = value - realization;
   
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [addendums, setAddendums] = useState<Partial<Addendum>[]>(contract.addendums || [{ number: '', date: '' }]);
 
   const formatCurrency = (num: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
@@ -42,6 +44,21 @@ export function EditContractForm({ contract }: EditContractFormProps) {
         return '';
       }
     }
+  };
+
+  const handleAddendumChange = (index: number, field: keyof Addendum, value: string) => {
+    const newAddendums = [...addendums];
+    newAddendums[index] = { ...newAddendums[index], [field]: value };
+    setAddendums(newAddendums);
+  };
+
+  const addAddendumRow = () => {
+    setAddendums([...addendums, { number: '', date: '' }]);
+  };
+
+  const removeAddendumRow = (index: number) => {
+    const newAddendums = addendums.filter((_, i) => i !== index);
+    setAddendums(newAddendums);
   };
   
   const validateForm = (formData: FormData) => {
@@ -86,6 +103,13 @@ export function EditContractForm({ contract }: EditContractFormProps) {
           }
           return;
       }
+
+      const filteredAddendums = addendums
+        .filter(addendum => addendum.number && addendum.date)
+        .map(addendum => ({
+            number: addendum.number!,
+            date: addendum.date!
+        }));
       
       const updatedData: Partial<Contract> = {
           contractNumber: formData.get('contractNumber') as string,
@@ -93,13 +117,8 @@ export function EditContractForm({ contract }: EditContractFormProps) {
           description: formData.get('description') as string,
           implementer: formData.get('implementer') as string,
           value: Number(formData.get('value')),
+          addendums: filteredAddendums.length > 0 ? filteredAddendums : [],
       };
-
-      const addendumNumber = formData.get('addendumNumber') as string;
-      const addendumDate = formData.get('addendumDate') as string;
-
-      updatedData.addendumNumber = addendumNumber || undefined;
-      updatedData.addendumDate = addendumDate || undefined;
 
       updateContract(contract.id, updatedData);
       
@@ -125,15 +144,50 @@ export function EditContractForm({ contract }: EditContractFormProps) {
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="grid gap-2">
-            <Label htmlFor="addendumNumber">Nomor Addendum</Label>
-            <Input id="addendumNumber" name="addendumNumber" placeholder="Opsional" defaultValue={contract.addendumNumber} />
-        </div>
-        <div className="grid gap-2">
-            <Label htmlFor="addendumDate">Tanggal Addendum</Label>
-            <Input id="addendumDate" name="addendumDate" type="date" defaultValue={contract.addendumDate ? formatDateForInput(contract.addendumDate) : ''} />
-        </div>
+       <div className="grid gap-4">
+        <Label>Addendum (Opsional)</Label>
+        {addendums.map((addendum, index) => (
+          <div key={index} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] items-end gap-2 p-3 border rounded-lg bg-muted/50">
+            <div className="grid gap-2">
+              <Label htmlFor={`addendumNumber-${index}`} className="text-xs">Nomor Addendum {index + 1}</Label>
+              <Input
+                id={`addendumNumber-${index}`}
+                name={`addendumNumber-${index}`}
+                placeholder="Nomor Addendum"
+                value={addendum.number || ''}
+                onChange={(e) => handleAddendumChange(index, 'number', e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+               <Label htmlFor={`addendumDate-${index}`} className="text-xs">Tanggal Addendum {index + 1}</Label>
+              <Input
+                id={`addendumDate-${index}`}
+                name={`addendumDate-${index}`}
+                type="date"
+                value={addendum.date ? formatDateForInput(addendum.date) : ''}
+                onChange={(e) => handleAddendumChange(index, 'date', e.target.value)}
+              />
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="text-destructive hover:bg-destructive/10"
+              onClick={() => removeAddendumRow(index)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+        <Button
+          type="button"
+          variant="outline"
+          onClick={addAddendumRow}
+          className="w-full"
+        >
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Tambah Addendum
+        </Button>
       </div>
 
       <div className="grid gap-2">

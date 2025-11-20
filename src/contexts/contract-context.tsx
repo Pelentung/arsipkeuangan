@@ -89,7 +89,10 @@ export function useContractContextData(): ContractContextType {
       ...contract,
       id: contract.id,
       contractDate: fromTimestamp(contract.contractDate),
-      addendumDate: contract.addendumDate ? fromTimestamp(contract.addendumDate) : undefined,
+      addendums: contract.addendums?.map((addendum: any) => ({
+        ...addendum,
+        date: fromTimestamp(addendum.date),
+      })) || [],
       bills: contract.bills?.map((bill: any) => ({
           ...bill,
           spmDate: fromTimestamp(bill.spmDate),

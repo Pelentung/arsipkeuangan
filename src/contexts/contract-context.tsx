@@ -43,9 +43,20 @@ export function useContractContext() {
   return context;
 }
 
-function fromTimestamp(timestamp: Timestamp | Date): string {
+function fromTimestamp(timestamp: Timestamp | Date | string): string {
     if (!timestamp) return '';
-    const date = timestamp instanceof Timestamp ? timestamp.toDate() : timestamp;
+    let date: Date;
+    if (timestamp instanceof Timestamp) {
+        date = timestamp.toDate();
+    } else if (typeof timestamp === 'string') {
+        date = new Date(timestamp);
+    } else {
+        date = timestamp;
+    }
+    // Check if the date is valid before calling toISOString
+    if (isNaN(date.getTime())) {
+        return '';
+    }
     return date.toISOString();
 }
 
@@ -92,10 +103,10 @@ export function useContractContextData(): ContractContextType {
   const loading = contractsLoading;
 
   const addContract = useCallback(async (newContractData: Omit<Contract, 'id'| 'realization' | 'remainingValue' | 'bills' | 'userId'>) => {
-    if (!contractsCollectionRef) return;
+    if (!contractsCollectionRef || !user) return;
     const dataToSave = {
       ...newContractData,
-      userId: contractsCollectionRef.parent.parent?.id, 
+      userId: user.uid, 
       realization: 0,
       remainingValue: newContractData.value,
       bills: [],
@@ -113,7 +124,7 @@ export function useContractContextData(): ContractContextType {
       });
       errorEmitter.emit('permission-error', permissionError);
     });
-  }, [contractsCollectionRef]);
+  }, [contractsCollectionRef, user]);
 
 
   const updateContract = useCallback(async (contractId: string, updatedData: Partial<Omit<Contract, 'id' | 'userId' | 'bills'>>) => {
@@ -157,7 +168,7 @@ export function useContractContextData(): ContractContextType {
   }, [contractsCollectionRef]);
 
   const addBill = useCallback(async (contractId: string, billData: Omit<Bill, 'id'>) => {
-    if (!contractsCollectionRef) return;
+    if (!contractsCollectionRef || !firestore) return;
     const contractDocRef = doc(contractsCollectionRef, contractId);
     const originalContract = contracts.find(c => c.id === contractId);
     if (!originalContract) return;

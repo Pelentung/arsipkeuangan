@@ -2,27 +2,8 @@
 
 import { AppSidebar } from '@/components/app/app-sidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useUser } from '@/firebase';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 
 export default function LaporanPage() {
-    const { user, isUserLoading } = useUser();
-    const router = useRouter();
-
-    useEffect(() => {
-        if (!isUserLoading && !user) {
-            router.push('/login');
-        }
-    }, [user, isUserLoading, router]);
-
-    if (isUserLoading || !user) {
-        return (
-            <div className="flex min-h-screen w-full bg-background items-center justify-center">
-                <p>Memuat...</p>
-            </div>
-        );
-    }
     
     return (
         <div className="flex min-h-screen w-full bg-background">

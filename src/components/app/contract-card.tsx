@@ -2,17 +2,17 @@
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Contract } from '@/lib/types';
-import { FileText, User, Calendar, Coins, Receipt, Wallet, Plus } from 'lucide-react';
+import { FileText, User, Calendar, Coins, Receipt, Wallet } from 'lucide-react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { AddBillDialog } from './add-bill-dialog';
-import { Button } from '../ui/button';
 
 interface ContractCardProps {
   contract: Contract;
+  onAddBill: (contractId: string, bill: { amount: number, billDate: string, description: string }) => void;
 }
 
-export function ContractCard({ contract }: ContractCardProps) {
+export function ContractCard({ contract, onAddBill }: ContractCardProps) {
   const contractDate = new Date(contract.contractDate);
   const formatCurrency = (num: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
@@ -57,7 +57,7 @@ export function ContractCard({ contract }: ContractCardProps) {
                 <span>{formatCurrency(contract.remainingValue)}</span>
             </div>
         </div>
-         <AddBillDialog contractId={contract.id} userId={contract.userId} />
+         <AddBillDialog contractId={contract.id} userId={contract.userId} onAddBill={onAddBill} />
       </CardFooter>
     </Card>
   );

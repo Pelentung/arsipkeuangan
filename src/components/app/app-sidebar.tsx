@@ -3,9 +3,9 @@
 import { AppIcon } from '@/components/app/app-icon';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Home, LogOut, PanelLeft, BarChart2, ClipboardList } from 'lucide-react';
+import { Home, PanelLeft, BarChart2, ClipboardList } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 const navItems = [
     { href: '/', label: 'Dasbor', icon: Home },
@@ -13,17 +13,8 @@ const navItems = [
     { href: '/statistik', label: 'Statistik', icon: BarChart2 },
 ]
 
-async function handleLogout() {
-    await fetch('/api/logout', {
-      method: 'POST',
-    });
-    window.location.href = '/login';
-  }
-
 export function AppSidebar() {
-  const router = useRouter();
   const pathname = usePathname();
-
 
   const NavLinks = ({ isMobile = false }: { isMobile?: boolean }) => (
     <>
@@ -56,10 +47,6 @@ export function AppSidebar() {
           <div className="grid gap-1">
             <NavLinks />
           </div>
-          <Button variant="ghost" onClick={handleLogout} className="justify-start">
-            <LogOut className="mr-3 h-4 w-4" />
-            Keluar
-          </Button>
         </nav>
       </aside>
       <header className="flex h-16 items-center gap-4 border-b bg-card px-4 md:hidden">
@@ -78,12 +65,6 @@ export function AppSidebar() {
             <nav className="grid gap-2 text-lg font-medium p-4">
                <NavLinks isMobile />
             </nav>
-            <div className="mt-auto p-4">
-               <Button variant="ghost" onClick={handleLogout} className="w-full justify-start text-lg">
-                <LogOut className="mr-4 h-5 w-5" />
-                Keluar
-              </Button>
-            </div>
           </SheetContent>
         </Sheet>
         <div className="flex items-center gap-2 font-semibold">

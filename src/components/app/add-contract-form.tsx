@@ -1,79 +1,96 @@
 'use client';
 
-import { useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
-import { addContract, type ContractState } from '@/app/actions';
-import { useEffect, useRef, useState } from 'react';
+import { useState, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2 } from 'lucide-react';
-import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" disabled={pending} className="w-full">
-      {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-      Simpan
-    </Button>
-  );
-}
-
 export function AddContractForm() {
-  const { user } = useUser();
   const router = useRouter();
-  const initialState: ContractState = { message: null, errors: {} };
-  
-  const [state, dispatch] = useActionState(addContract, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
 
   const [value, setValue] = useState(0);
   const [realization, setRealization] = useState(0);
   const remainingValue = value - realization;
-
-  useEffect(() => {
-    if (state.message) {
-      if (state.errors && Object.keys(state.errors).length > 0) {
-        toast({
-          title: 'Kesalahan',
-          description: state.message,
-          variant: 'destructive',
-        });
-      } else {
-        toast({
-          title: 'Sukses',
-          description: state.message,
-        });
-        formRef.current?.reset();
-        router.push('/');
-      }
-    }
-  }, [state, toast, router]);
+  
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const formatCurrency = (num: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
   };
+  
+  const validateForm = (formData: FormData) => {
+      const newErrors: Record<string, string> = {};
+      if (!formData.get('contractNumber')) newErrors.contractNumber = 'Nomor kontrak wajib diisi.';
+      if (!formData.get('contractDate')) newErrors.contractDate = 'Tanggal kontrak wajib diisi.';
+      if (!formData.get('description')) newErrors.description = 'Uraian wajib diisi.';
+      if (!formData.get('implementer')) newErrors.implementer = 'Pelaksana wajib diisi.';
+      if (Number(formData.get('value')) <= 0) newErrors.value = 'Nilai harus lebih dari 0.';
+
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+  }
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      const formData = new FormData(event.currentTarget);
+      
+      if (!validateForm(formData)) {
+          toast({
+              title: 'Kesalahan Validasi',
+              description: 'Silakan periksa kembali isian Anda.',
+              variant: 'destructive'
+          });
+          return;
+      }
+      
+      const newContract = {
+          contractNumber: formData.get('contractNumber') as string,
+          contractDate: formData.get('contractDate') as string,
+          addendumNumber: formData.get('addendumNumber') as string || undefined,
+          addendumDate: formData.get('addendumDate') as string || undefined,
+          description: formData.get('description') as string,
+          implementer: formData.get('implementer') as string,
+          value: Number(formData.get('value')),
+          realization: Number(formData.get('realization')) || 0,
+          userId: 'local-user', // Placeholder for local storage
+      };
+
+      // The global function is attached to 'window' in page.tsx
+      if (typeof (window as any).addContract === 'function') {
+          (window as any).addContract(newContract);
+          toast({
+              title: 'Sukses',
+              description: 'Berhasil menambahkan kontrak.'
+          });
+          formRef.current?.reset();
+          router.push('/');
+      } else {
+          toast({
+              title: 'Kesalahan',
+              description: 'Fungsi untuk menyimpan tidak ditemukan.',
+              variant: 'destructive'
+          });
+      }
+  }
 
 
   return (
-    <form ref={formRef} action={dispatch} className="grid gap-6 py-4">
-      <input type="hidden" name="userId" value={user?.uid || ''} />
-
+    <form ref={formRef} onSubmit={handleSubmit} className="grid gap-6 py-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="grid gap-2">
             <Label htmlFor="contractNumber">Nomor Kontrak</Label>
             <Input id="contractNumber" name="contractNumber" />
-            {state.errors?.contractNumber && <p className="text-sm font-medium text-destructive mt-1">{state.errors.contractNumber[0]}</p>}
+            {errors.contractNumber && <p className="text-sm font-medium text-destructive mt-1">{errors.contractNumber}</p>}
         </div>
         <div className="grid gap-2">
             <Label htmlFor="contractDate">Tanggal Kontrak</Label>
             <Input id="contractDate" name="contractDate" type="date" />
-            {state.errors?.contractDate && <p className="text-sm font-medium text-destructive mt-1">{state.errors.contractDate[0]}</p>}
+            {errors.contractDate && <p className="text-sm font-medium text-destructive mt-1">{errors.contractDate}</p>}
         </div>
       </div>
       
@@ -91,13 +108,13 @@ export function AddContractForm() {
       <div className="grid gap-2">
         <Label htmlFor="description">Uraian</Label>
         <Textarea id="description" name="description" />
-        {state.errors?.description && <p className="text-sm font-medium text-destructive mt-1">{state.errors.description[0]}</p>}
+        {errors.description && <p className="text-sm font-medium text-destructive mt-1">{errors.description}</p>}
       </div>
 
       <div className="grid gap-2">
         <Label htmlFor="implementer">Pelaksana</Label>
         <Input id="implementer" name="implementer" />
-        {state.errors?.implementer && <p className="text-sm font-medium text-destructive mt-1">{state.errors.implementer[0]}</p>}
+        {errors.implementer && <p className="text-sm font-medium text-destructive mt-1">{errors.implementer}</p>}
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -111,7 +128,7 @@ export function AddContractForm() {
               value={value}
               onChange={(e) => setValue(Number(e.target.value))}
             />
-            {state.errors?.value && <p className="text-sm font-medium text-destructive mt-1">{state.errors.value[0]}</p>}
+            {errors.value && <p className="text-sm font-medium text-destructive mt-1">{errors.value}</p>}
         </div>
         <div className="grid gap-2">
             <Label htmlFor="realization">Realisasi (Rp)</Label>
@@ -123,19 +140,17 @@ export function AddContractForm() {
               value={realization}
               onChange={(e) => setRealization(Number(e.target.value))}
             />
-             {state.errors?.realization && <p className="text-sm font-medium text-destructive mt-1">{state.errors.realization[0]}</p>}
         </div>
         <div className="grid gap-2">
             <Label htmlFor="remainingValue">Sisa Kontrak (Rp)</Label>
             <Input id="remainingValue" name="remainingValue" type="text" readOnly value={formatCurrency(remainingValue)} className="bg-muted" />
-             <input type="hidden" name="remainingValueNumeric" value={remainingValue} />
         </div>
       </div>
        
-       {state.errors?.server && <p className="text-sm font-medium text-destructive mt-1 text-center">{state.errors.server[0]}</p>}
-      
       <div>
-        <SubmitButton />
+        <Button type="submit" className="w-full">
+            Simpan
+        </Button>
       </div>
     </form>
   );

@@ -1,11 +1,8 @@
 'use client';
 
 import { AppSidebar } from '@/components/app/app-sidebar';
-import { getContracts } from '@/lib/contracts';
-import { ContractView, ContractViewSkeleton } from '@/components/app/contract-view';
+import { ContractView } from '@/components/app/contract-view';
 import { Suspense, useEffect, useMemo, useState } from 'react';
-import { useUser } from '@/firebase';
-import { useRouter } from 'next/navigation';
 import type { Contract } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Coins, Receipt, Wallet, PlusCircle } from 'lucide-react';
@@ -13,7 +10,7 @@ import { ContractStatusChart } from '@/components/app/contract-status-chart';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
-function Dashboard({ contracts }: { contracts: Contract[] }) {
+function Dashboard({ contracts, onAddContract, onAddBill }: { contracts: Contract[], onAddContract: (contract: Omit<Contract, 'id' | 'realization' | 'remainingValue'>) => void; onAddBill: (contractId: string, bill: { amount: number, billDate: string, description: string }) => void; }) {
   const summary = useMemo(() => {
     const total = contracts.length;
     const totalValue = contracts.reduce((sum, c) => sum + c.value, 0);
@@ -113,48 +110,75 @@ function Dashboard({ contracts }: { contracts: Contract[] }) {
         </CardContent>
       </Card>
 
-      <ContractView initialContracts={contracts} />
+      <ContractView initialContracts={contracts} onAddBill={onAddBill} />
     </>
   );
 }
 
-
-function DashboardLoader({ userId }: { userId: string }) {
+export default function Home() {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadContracts() {
-      if (userId) {
-        const fetchedContracts = await getContracts(userId);
-        setContracts(fetchedContracts);
-        setLoading(false);
+    try {
+      const savedContracts = localStorage.getItem('contracts');
+      if (savedContracts) {
+        setContracts(JSON.parse(savedContracts));
       }
+    } catch (error) {
+      console.error("Failed to load contracts from localStorage", error);
+    } finally {
+      setLoading(false);
     }
-    loadContracts();
-  }, [userId]);
-
-  if (loading) {
-    return <ContractViewSkeleton />;
-  }
-
-  return <Dashboard contracts={contracts} />;
-}
-
-export default function Home() {
-  const { user, isUserLoading } = useUser();
-  const router = useRouter();
+  }, []);
 
   useEffect(() => {
-    if (!isUserLoading && !user) {
-      router.push('/login');
+    try {
+      localStorage.setItem('contracts', JSON.stringify(contracts));
+    } catch (error) {
+      console.error("Failed to save contracts to localStorage", error);
     }
-  }, [user, isUserLoading, router]);
+  }, [contracts]);
 
-  if (isUserLoading || !user) {
+  const handleAddContract = (newContractData: Omit<Contract, 'id' | 'realization' | 'remainingValue'>) => {
+    setContracts(prevContracts => {
+      const newContract: Contract = {
+        ...newContractData,
+        id: new Date().toISOString(), // Simple unique ID
+        realization: newContractData.value - (newContractData.value - (newContractData.realization || 0)),
+        remainingValue: newContractData.value - (newContractData.realization || 0),
+      };
+      return [...prevContracts, newContract];
+    });
+  };
+
+  const handleAddBill = (contractId: string, bill: { amount: number, billDate: string, description: string }) => {
+    setContracts(prevContracts => {
+      return prevContracts.map(contract => {
+        if (contract.id === contractId) {
+          const newRealization = contract.realization + bill.amount;
+          const newRemainingValue = contract.value - newRealization;
+          return {
+            ...contract,
+            realization: newRealization,
+            remainingValue: newRemainingValue,
+          };
+        }
+        return contract;
+      });
+    });
+  };
+  
+  // This state is passed down to the form to handle creation
+  if (typeof window !== 'undefined') {
+    (window as any).addContract = handleAddContract;
+    (window as any).addBill = handleAddBill;
+  }
+
+  if (loading) {
     return (
       <div className="flex min-h-screen w-full bg-background items-center justify-center">
-        <ContractViewSkeleton />
+        <p>Memuat data lokal...</p>
       </div>
     );
   }
@@ -163,8 +187,8 @@ export default function Home() {
     <div className="flex min-h-screen w-full bg-background">
       <AppSidebar />
       <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
-        <Suspense fallback={<ContractViewSkeleton />}>
-          <DashboardLoader userId={user.uid} />
+        <Suspense fallback={<p>Memuat...</p>}>
+          <Dashboard contracts={contracts} onAddContract={handleAddContract} onAddBill={handleAddBill} />
         </Suspense>
       </main>
     </div>

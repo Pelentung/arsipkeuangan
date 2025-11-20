@@ -81,7 +81,7 @@ export default function ContractTableRow({
         </TableCell>
         <TableCell className="text-center">
           <Badge
-            variant={status === 'Selesai' ? 'default' : 'secondary'}
+            variant={status === 'Selesai' ? 'default' : 'destructive'}
             className={cn(
               status === 'Selesai' && 'bg-green-600 hover:bg-green-600/90'
             )}

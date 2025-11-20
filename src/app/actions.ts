@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { getFirestoreAdmin } from '@/firebase/server-init';
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 
 const ContractFormSchema = z.object({
   contractNumber: z.string().min(1, 'Nomor kontrak wajib diisi.'),
@@ -89,16 +89,17 @@ export async function addContract(prevState: ContractState, formData: FormData):
   const newContract: any = {
     userId,
     contractNumber,
-    contractDate: new Date(contractDate),
+    contractDate: Timestamp.fromDate(new Date(contractDate)),
     description,
     implementer,
     value,
     realization,
     remainingValue,
+    createdAt: FieldValue.serverTimestamp(),
   };
 
   if (addendumNumber) newContract.addendumNumber = addendumNumber;
-  if (addendumDate) newContract.addendumDate = new Date(addendumDate);
+  if (addendumDate && addendumDate.length > 0) newContract.addendumDate = Timestamp.fromDate(new Date(addendumDate));
 
   const contractsColRef = firestore.collection(`users/${userId}/contracts`);
   
@@ -164,7 +165,7 @@ export async function addBill(prevState: BillState, formData: FormData): Promise
       const newBillRef = billsColRef.doc();
       transaction.set(newBillRef, {
         amount,
-        billDate: new Date(billDate),
+        billDate: Timestamp.fromDate(new Date(billDate)),
         description,
         createdAt: FieldValue.serverTimestamp(),
       });

@@ -1,138 +1,30 @@
-/**
- * This ruleset enforces a strict user-ownership security model for a contract
- * management application. It ensures that users can only access and manage their
- * own data, while providing public read access to globally shared information.
- *
- * Core Philosophy:
- * The security model is centered around path-based ownership. All private user
- * data, such as contracts and their associated reminders, is stored in a
- * hierarchical path that includes the user's unique ID (UID). This makes
- * authorization checks simple, performant, and secure.
- *
- * Data Structure:
- * - /users/{userId}/contracts/{contractId}: Each user's contracts are stored
- *   in a subcollection under their own unique user document path.
- * - /users/{userId}/contracts/{contractId}/reminders/{reminderId}: Reminders
- *   are nested under the specific contract they belong to, inheriting ownership.
- * - /parties/{partyId}: Information about contract parties is stored in a
- *   separate, top-level collection that is publicly readable.
- *
- * Key Security Decisions:
- * - Strict Ownership: All user-specific data is private. A user can only
- *   read, create, update, or delete documents located within their own
- *   /users/{userId} data tree.
- * - No User Listing: There are no rules for the `/users` collection itself,
- *   which prevents clients from listing all users in the application.
- * - Public Read-Only Collection: The `/parties` collection is readable by
- *   anyone, including unauthenticated users, to facilitate contract creation.
- *   However, writes to this collection are disabled from the client-side to
- *   prevent unauthorized modification of shared data. This data should be
- *   managed by a trusted backend service or admin process.
- * - Relational Integrity: On creation, rules validate that key identifiers
- *   within a document (e.g., `contractId` in a reminder) match the IDs in the
- *   document's path. On update, these identifiers are enforced as immutable.
- *
- */
+
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions for reusable logic
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
     function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
+      return request.auth != null && request.auth.uid == userId;
     }
 
-    /**
-     * Checks for ownership and that the document already exists.
-     * Crucial for safe update and delete operations.
-     */
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
+    match /contracts/{contractId} {
+      // Allow read access only to the user who owns the contract
+      allow get, list: if isOwner(resource.data.userId);
+
+      // Allow create access if the user is authenticated and the userId in the document matches their uid
+      allow create: if isOwner(request.resource.data.userId);
+
+      // Allow update access only to the owner of the document
+      allow update: if isOwner(resource.data.userId);
+
+      // Allow delete access only to the owner of the document
+      allow delete: if isOwner(resource.data.userId);
     }
 
-    /**
-     * Validates that a contract exists at the specified path.
-     * Used to prevent creating orphaned subcollection documents.
-     */
-    function parentContractExists(userId, contractId) {
-      return exists(/databases/$(database)/documents/users/$(userId)/contracts/$(contractId));
-    }
-
-    /**
-     * Validates required relational fields on contract creation.
-     */
-    function hasValidContractDataOnCreate(contractId) {
-      return request.resource.data.id == contractId;
-    }
-
-    /**
-     * Enforces immutability of the contract's unique ID.
-     */
-    function contractIdIsImmutable() {
-      return request.resource.data.id == resource.data.id;
-    }
-
-    /**
-     * Validates required relational fields on reminder creation.
-     */
-    function hasValidReminderDataOnCreate(reminderId, contractId) {
-      return request.resource.data.id == reminderId
-          && request.resource.data.contractId == contractId;
-    }
-
-    /**
-     * Enforces immutability of a reminder's core relational fields.
-     */
-    function reminderDataIsImmutable() {
-      return request.resource.data.id == resource.data.id
-          && request.resource.data.contractId == resource.data.contractId;
-    }
-
-
-    /**
-     * @description Manages user-owned contract documents.
-     * @path /users/{userId}/contracts/{contractId}
-     * @allow (create) An authenticated user creating a contract for themselves. `auth.uid` must match `userId`.
-     * @deny (get) An authenticated user trying to read another user's contract.
-     * @principle Restricts access to a user's own data tree.
-     */
-    match /users/{userId}/contracts/{contractId} {
-      allow get, list: if isOwner(userId);
-      allow create: if isOwner(userId) && hasValidContractDataOnCreate(contractId);
-      allow update: if isExistingOwner(userId) && contractIdIsImmutable();
-      allow delete: if isExistingOwner(userId);
-    }
-
-    /**
-     * @description Manages reminders for a specific user-owned contract.
-     * @path /users/{userId}/contracts/{contractId}/reminders/{reminderId}
-     * @allow (create) The contract owner creating a reminder for their own contract.
-     * @deny (list) An authenticated user trying to list reminders for another user's contract.
-     * @principle Inherits ownership from the parent path and validates relational integrity.
-     */
-    match /users/{userId}/contracts/{contractId}/reminders/{reminderId} {
-      allow get, list: if isOwner(userId);
-      allow create: if isOwner(userId) && parentContractExists(userId, contractId) && hasValidReminderDataOnCreate(reminderId, contractId);
-      allow update: if isExistingOwner(userId) && parentContractExists(userId, contractId) && reminderDataIsImmutable();
-      allow delete: if isExistingOwner(userId);
-    }
-
-    /**
-     * @description Stores global information about parties involved in contracts.
-     * @path /parties/{partyId}
-     * @allow (get) Any user, including unauthenticated users, reading a party's details.
-     * @deny (create) Any client attempting to create a new party document.
-     * @principle Provides public read access to shared data while preventing client-side modification.
-     */
     match /parties/{partyId} {
       allow get, list: if true;
-      allow create: if false; // Writes should be handled by a trusted backend service.
-      allow update: if false; // Writes should be handled by a trusted backend service.
-      allow delete: if false; // Writes should be handled by a trusted backend service.
+      allow create, update, delete: if false; // Managed by backend
     }
   }
 }

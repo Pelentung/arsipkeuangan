@@ -55,19 +55,14 @@ export function useContractContextData(): ContractContextType {
   const { user } = useUser();
   const firestore = useFirestore();
 
-  const contractsCollectionRef = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return collection(firestore, 'contracts');
-  }, [firestore]);
-
   const contractsQuery = useMemoFirebase(() => {
-    if (!firestore || !user || !contractsCollectionRef) return null;
-    return query(contractsCollectionRef, where('userId', '==', user.uid));
-  }, [firestore, user, contractsCollectionRef]);
+    if (!firestore || !user) return null;
+    const contractsCollection = collection(firestore, 'contracts');
+    return query(contractsCollection, where('userId', '==', user.uid));
+  }, [firestore, user]);
 
   const { data: contractsData, isLoading: contractsLoading } = useCollection(contractsQuery, {
       snapshotListenOptions: { includeMetadataChanges: true },
-      // The transform function was removed, as it's not a valid option for useCollection
   });
   
   const contracts = useMemo(() => {

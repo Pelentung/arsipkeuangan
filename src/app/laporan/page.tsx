@@ -6,10 +6,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useContractContext } from '@/contexts/contract-context';
 import { Download } from 'lucide-react';
 import { useUser } from '@/firebase';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function LaporanPage() {
     const { contracts } = useContractContext();
-    const { user } = useUser();
+    const { user, loading: userLoading } = useUser();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!userLoading && !user) {
+            router.push('/login');
+        }
+    }, [user, userLoading, router]);
 
     const escapeCsvCell = (cell: any): string => {
         if (cell === null || cell === undefined) {
@@ -97,6 +106,10 @@ export default function LaporanPage() {
             document.body.removeChild(link);
         }
     };
+
+    if (userLoading || !user) {
+        return <p>Memuat...</p>;
+    }
     
     return (
         <main className="flex-1 flex-col p-4 sm:p-6 lg:p-8">

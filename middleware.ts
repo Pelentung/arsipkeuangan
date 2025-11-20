@@ -1,44 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { authentication } from 'next-firebase-auth-edge/lib/next/middleware';
-import { authConfig } from './src/config/auth-config';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-const PUBLIC_PATHS = ['/login'];
-
-function isPublic(path: string) {
-  return PUBLIC_PATHS.includes(path);
+// This function can be marked `async` if using `await` inside
+export function middleware(request: NextRequest) {
+  // The middleware is now simplified and doesn't handle auth directly.
+  // Client-side checks will handle route protection.
+  return NextResponse.next();
 }
 
-export async function middleware(request: NextRequest) {
-  return authentication(request, {
-    loginPath: '/api/login',
-    logoutPath: '/api/logout',
-    ...authConfig,
-    handleValidToken: async ({ token, decodedToken }) => {
-      if (isPublic(request.nextUrl.pathname)) {
-        return NextResponse.redirect(new URL('/', request.url));
-      }
-
-      return NextResponse.next();
-    },
-    handleInvalidToken: async () => {
-      if (isPublic(request.nextUrl.pathname)) {
-        return NextResponse.next();
-      }
-
-      return NextResponse.redirect(new URL('/login', request.url));
-    },
-    handleError: async (error) => {
-      console.error('Middleware error:', { error });
-
-      if (isPublic(request.nextUrl.pathname)) {
-        return NextResponse.next();
-      }
-
-      return NextResponse.redirect(new URL('/login', request.url));
-    },
-  });
-}
-
+// See "Matching Paths" below to learn more
 export const config = {
-  matcher: ['/((?!_next/static|favicon.ico|api/login|api/logout).*)'],
+  matcher: '/:path*',
 };

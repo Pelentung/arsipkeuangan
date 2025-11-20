@@ -34,20 +34,7 @@ export default function LoginPage() {
   const handleLogin = async () => {
     setIsLoading(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const idToken = await userCredential.user.getIdToken();
-
-      await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
-
+      await signInWithEmailAndPassword(auth, email, password);
       router.push('/');
     } catch (error: any) {
       toast({
@@ -66,14 +53,7 @@ export default function LoginPage() {
   const handleAnonymousLogin = async () => {
     setIsLoading(true);
     try {
-      const userCredential = await signInAnonymously(auth);
-      const idToken = await userCredential.user.getIdToken();
-       await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
+      await signInAnonymously(auth);
       router.push('/');
     } catch (error) {
        toast({

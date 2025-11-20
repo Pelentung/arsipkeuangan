@@ -7,7 +7,9 @@ import { Home, PanelLeft, ClipboardList, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { useUser } from '@/firebase';
+import { useUser, useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 const navItems = [
     { href: '/', label: 'Data Kontrak', icon: Home },
@@ -17,11 +19,13 @@ const navItems = [
 export function AppSidebar() {
   const pathname = usePathname();
   const { user, claims } = useUser();
+  const auth = useAuth();
+  const router = useRouter();
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/logout', { method: 'POST' });
-      window.location.href = '/login';
+      await signOut(auth);
+      router.push('/login');
     } catch (error) {
       console.error('Logout failed:', error);
     }

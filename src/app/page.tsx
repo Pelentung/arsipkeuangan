@@ -1,7 +1,7 @@
 'use client';
 
 import { ContractView } from '@/components/app/contract-view';
-import { Suspense, useMemo } from 'react';
+import { Suspense, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Coins, Receipt, Wallet, PlusCircle } from 'lucide-react';
 import { ContractStatusChart } from '@/components/app/contract-status-chart';
@@ -9,10 +9,18 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useContractContext } from '@/contexts/contract-context';
 import { useUser } from '@/firebase';
+import { useRouter } from 'next/navigation';
 
 function Dashboard() {
   const { contracts, loading } = useContractContext();
-  const { user, claims } = useUser();
+  const { user, claims, loading: userLoading } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!userLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, userLoading, router]);
 
   const summary = useMemo(() => {
     if (loading || !contracts) {
@@ -52,8 +60,8 @@ function Dashboard() {
     return Object.entries(monthlyData).map(([month, data]) => ({ month, ...data }));
   }, [contracts, loading]);
 
-  if (loading && !user) {
-    return <p>Mengautentikasi...</p>;
+  if (userLoading || !user) {
+    return <p>Mengalihkan ke halaman login...</p>;
   }
 
   return (

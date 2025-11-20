@@ -3,14 +3,13 @@
 import { AppIcon } from '@/components/app/app-icon';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Home, PanelLeft, BarChart2, ClipboardList } from 'lucide-react';
+import { Home, PanelLeft, ClipboardList } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const navItems = [
     { href: '/', label: 'Dasbor', icon: Home },
     { href: '/laporan', label: 'Laporan', icon: ClipboardList },
-    { href: '/statistik', label: 'Statistik', icon: BarChart2 },
 ]
 
 export function AppSidebar() {

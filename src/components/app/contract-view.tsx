@@ -10,10 +10,9 @@ import Link from 'next/link';
 
 interface ContractViewProps {
   initialContracts: Contract[];
-  onAddBill: (contractId: string, bill: { amount: number, billDate: string, description: string }) => void;
 }
 
-export function ContractView({ initialContracts, onAddBill }: ContractViewProps) {
+export function ContractView({ initialContracts }: ContractViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredContracts = useMemo(() => {
@@ -49,7 +48,7 @@ export function ContractView({ initialContracts, onAddBill }: ContractViewProps)
       {filteredContracts.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredContracts.map((contract) => (
-            <ContractCard key={contract.id} contract={contract} onAddBill={onAddBill} />
+            <ContractCard key={contract.id} contract={contract} />
           ))}
         </div>
       ) : (

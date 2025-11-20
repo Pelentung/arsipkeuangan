@@ -7,11 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useRouter } from 'next/navigation';
+import { useContractContext } from '@/contexts/contract-context';
 
 export function AddContractForm() {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
+  const { addContract } = useContractContext();
 
   const [value, setValue] = useState(0);
   const [realization, setRealization] = useState(0);
@@ -60,22 +62,13 @@ export function AddContractForm() {
           userId: 'local-user', // Placeholder for local storage
       };
 
-      // The global function is attached to 'window' in page.tsx
-      if (typeof (window as any).addContract === 'function') {
-          (window as any).addContract(newContract);
-          toast({
-              title: 'Sukses',
-              description: 'Berhasil menambahkan kontrak.'
-          });
-          formRef.current?.reset();
-          router.push('/');
-      } else {
-          toast({
-              title: 'Kesalahan',
-              description: 'Fungsi untuk menyimpan tidak ditemukan.',
-              variant: 'destructive'
-          });
-      }
+      addContract(newContract);
+      toast({
+          title: 'Sukses',
+          description: 'Berhasil menambahkan kontrak.'
+      });
+      formRef.current?.reset();
+      router.push('/');
   }
 
 

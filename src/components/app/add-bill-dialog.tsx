@@ -17,18 +17,19 @@ import { Textarea } from '../ui/textarea';
 import { useRef, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useContractContext } from '@/contexts/contract-context';
 
 interface AddBillDialogProps {
   contractId: string;
   userId: string;
-  onAddBill: (contractId: string, bill: { amount: number, billDate: string, description: string }) => void;
 }
 
-export function AddBillDialog({ contractId, userId, onAddBill }: AddBillDialogProps) {
+export function AddBillDialog({ contractId, userId }: AddBillDialogProps) {
   const [open, setOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const { addBill } = useContractContext();
 
   const validateForm = (formData: FormData) => {
     const newErrors: Record<string, string> = {};
@@ -59,22 +60,13 @@ export function AddBillDialog({ contractId, userId, onAddBill }: AddBillDialogPr
         description: formData.get('description') as string,
     };
     
-    // The global function is attached to 'window' in page.tsx
-    if (typeof (window as any).addBill === 'function') {
-        (window as any).addBill(contractId, newBill);
-        toast({
-            title: 'Sukses',
-            description: 'Tagihan berhasil ditambahkan.',
-        });
-        formRef.current?.reset();
-        setOpen(false);
-    } else {
-        toast({
-            title: 'Kesalahan',
-            description: 'Fungsi untuk menyimpan tagihan tidak ditemukan.',
-            variant: 'destructive'
-        });
-    }
+    addBill(contractId, newBill);
+    toast({
+        title: 'Sukses',
+        description: 'Tagihan berhasil ditambahkan.',
+    });
+    formRef.current?.reset();
+    setOpen(false);
   };
 
   return (

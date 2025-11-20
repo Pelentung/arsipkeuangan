@@ -9,10 +9,9 @@ import { AddBillDialog } from './add-bill-dialog';
 
 interface ContractCardProps {
   contract: Contract;
-  onAddBill: (contractId: string, bill: { amount: number, billDate: string, description: string }) => void;
 }
 
-export function ContractCard({ contract, onAddBill }: ContractCardProps) {
+export function ContractCard({ contract }: ContractCardProps) {
   const contractDate = new Date(contract.contractDate);
   const formatCurrency = (num: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
@@ -57,7 +56,7 @@ export function ContractCard({ contract, onAddBill }: ContractCardProps) {
                 <span>{formatCurrency(contract.remainingValue)}</span>
             </div>
         </div>
-         <AddBillDialog contractId={contract.id} userId={contract.userId} onAddBill={onAddBill} />
+         <AddBillDialog contractId={contract.id} userId={contract.userId} />
       </CardFooter>
     </Card>
   );

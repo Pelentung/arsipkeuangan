@@ -17,7 +17,10 @@ import {
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { DeleteContractDialog } from './delete-contract-dialog';
-import { CollapsibleTrigger } from '@radix-ui/react-collapsible';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import BillTableRow from './bill-table-row';
+import { Badge } from '../ui/badge';
+import { cn } from '@/lib/utils';
 
 interface ContractTableRowProps {
   contract: Contract;
@@ -37,9 +40,12 @@ export default function ContractTableRow({
       minimumFractionDigits: 0,
     }).format(num);
   };
+  
+  const status = contract.remainingValue <= 0 ? 'Selesai' : 'Belum Selesai';
 
   return (
-    <TableRow className="bg-card hover:bg-card/90">
+   <>
+    <TableRow className="bg-card hover:bg-card/90" data-state={isOpen ? 'open' : 'closed'}>
       <TableCell>
         <div className="font-medium">{contract.contractNumber}</div>
         <div className="text-xs text-muted-foreground">
@@ -58,6 +64,12 @@ export default function ContractTableRow({
       </TableCell>
       <TableCell className="text-right font-medium">
         {formatCurrency(contract.remainingValue)}
+      </TableCell>
+      <TableCell className="text-center">
+        <Badge variant={status === 'Selesai' ? 'default' : 'secondary'} 
+            className={cn(status === 'Selesai' && 'bg-green-600 hover:bg-green-600/90')}>
+            {status}
+        </Badge>
       </TableCell>
       <TableCell className="text-center">
         <div className="flex items-center justify-center gap-1">
@@ -93,5 +105,50 @@ export default function ContractTableRow({
         </div>
       </TableCell>
     </TableRow>
+     <CollapsibleContent asChild>
+        <TableRow>
+            <TableCell colSpan={8} className="p-0">
+                <div className="p-4 bg-muted/50">
+                <h4 className="font-semibold mb-2">
+                    Detail Tagihan
+                </h4>
+                {contract.bills && contract.bills.length > 0 ? (
+                    <div className="rounded-md border bg-card">
+                    <Table>
+                        <TableHeader>
+                        <TableRow>
+                            <TableHead>No. SPM</TableHead>
+                            <TableHead>No. SP2D</TableHead>
+                            <TableHead>Uraian</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead className="text-right">
+                            Jumlah
+                            </TableHead>
+                            <TableHead className="text-center w-[120px]">
+                            Aksi
+                            </TableHead>
+                        </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                        {contract.bills.map((bill) => (
+                            <BillTableRow
+                            key={bill.id}
+                            bill={bill}
+                            contractId={contract.id}
+                            />
+                        ))}
+                        </TableBody>
+                    </Table>
+                    </div>
+                ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                    Belum ada tagihan untuk kontrak ini.
+                    </p>
+                )}
+                </div>
+            </TableCell>
+        </TableRow>
+     </CollapsibleContent>
+    </>
   );
 }

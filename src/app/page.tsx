@@ -3,8 +3,6 @@ import { useState, useEffect } from 'react';
 import {
   getAuth,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  updateProfile
 } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -117,7 +115,7 @@ export default function WelcomePage() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
       <div className="flex items-center gap-3 mb-6">
         <AppIcon className="w-8 h-8 text-primary" />
-        <h1 className="text-2xl font-bold">Gudang Kontrak</h1>
+        <h1 className="text-2xl font-headline font-bold">ARSIP DATA KONTRAK</h1>
       </div>
       <LoginForm />
     </div>

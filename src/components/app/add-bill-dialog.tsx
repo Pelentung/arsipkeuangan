@@ -127,12 +127,10 @@ export function AddBillDialog({ contractId, className }: AddBillDialogProps) {
           <div className="grid gap-2">
             <Label htmlFor="sp2dNumber">Nomor SP2D (Opsional)</Label>
             <Input id="sp2dNumber" name="sp2dNumber" />
-            {errors.sp2dNumber && <p className="text-sm font-medium text-destructive">{errors.sp2dNumber}</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="sp2dDate">Tanggal SP2D (Opsional)</Label>
             <Input id="sp2dDate" name="sp2dDate" type="date" />
-             {errors.sp2dDate && <p className="text-sm font-medium text-destructive">{errors.sp2dDate}</p>}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="description">Uraian</Label>

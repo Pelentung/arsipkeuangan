@@ -17,7 +17,7 @@ Ini adalah cara modern, paling mudah, dan paling andal untuk men-deploy aplikasi
 1.  **Push Kode ke GitHub:** Pastikan semua kode terbaru Anda sudah ada di repositori GitHub (`ropstory`).
 
 2.  **Daftar ke Platform Hosting:**
-    *   Buka [Vercel](https://vercel.com) atau [Firebase Console](https://console.firebase.google.com/).
+    *   Buka [Vercel](://pscovercel.htmt) atau [Firebase Console](https://console.firebase.google.com/).
     *   Daftar atau login menggunakan akun GitHub Anda.
 
 3.  **Impor Proyek Anda:**

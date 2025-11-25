@@ -1,85 +1,79 @@
-# Panduan Deployment ke Hosting Node.js (cPanel/Hostinger)
+# Panduan Deployment
 
-Langkah-langkah di bawah ini adalah cara yang paling direkomendasikan dan andal untuk men-deploy aplikasi Next.js ini ke lingkungan hosting bersama (shared hosting) yang seringkali memiliki keterbatasan.
-
-Metode utamanya adalah melakukan semua proses "berat" (instalasi dan build) di komputer lokal Anda, lalu hanya mengunggah hasilnya ke server.
+Ada dua metode utama untuk men-deploy aplikasi ini. Pilih salah satu yang paling sesuai untuk Anda.
 
 ---
+
+## Metode 1: Deployment Otomatis dari GitHub (Sangat Direkomendasikan)
+
+Ini adalah cara modern, paling mudah, dan paling andal untuk men-deploy aplikasi Next.js. Anda menghubungkan repositori GitHub Anda ke layanan hosting, dan setiap kali Anda melakukan `git push`, aplikasi akan otomatis di-build dan di-deploy.
+
+**Platform yang Direkomendasikan:**
+*   **Firebase App Hosting**: Pilihan yang sangat baik karena sudah terintegrasi dengan Firebase.
+*   **Vercel**: Dibuat oleh pengembang Next.js, sangat cepat dan mudah digunakan.
+
+### Langkah-langkah Umum (Contoh Menggunakan Vercel/Firebase App Hosting):
+
+1.  **Push Kode ke GitHub:** Pastikan semua kode terbaru Anda sudah ada di repositori GitHub (`ropstory`).
+
+2.  **Daftar ke Platform Hosting:**
+    *   Buka [Vercel](https://vercel.com) atau [Firebase Console](https://console.firebase.google.com/).
+    *   Daftar atau login menggunakan akun GitHub Anda.
+
+3.  **Impor Proyek Anda:**
+    *   Cari opsi seperti "Add New Project" atau "Import Project".
+    *   Pilih repositori GitHub `ropstory` dari daftar yang muncul.
+
+4.  **Konfigurasi Proyek:**
+    *   Platform akan otomatis mendeteksi bahwa ini adalah proyek Next.js. Anda biasanya tidak perlu mengubah pengaturan build apa pun.
+
+5.  **Tambahkan Environment Variables (PENTING!):**
+    *   Cari bagian "Environment Variables" di pengaturan proyek.
+    *   Anda harus menambahkan semua kunci Firebase Anda di sini. Ini menjaga agar kunci Anda tetap aman. Tambahkan satu per satu:
+        *   `NEXT_PUBLIC_FIREBASE_API_KEY` = `AIza...` (Salin dari file config lama Anda)
+        *   `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` = `studio... .firebaseapp.com`
+        *   `NEXT_PUBLIC_FIREBASE_PROJECT_ID` = `studio-7968430515-d32d0`
+        *   `NEXT_PUBLIC_FIREBASE_APP_ID` = `1:929...`
+        *   `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` = `929...`
+        *   `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID` = (jika ada)
+
+6.  **Deploy:**
+    *   Klik tombol "Deploy".
+    *   Platform akan menarik kode Anda dari GitHub, melakukan `npm install` dan `npm run build`, lalu men-deploy aplikasi Anda. Anda akan mendapatkan URL publik setelah selesai.
+
+7.  **Otorisasi Domain di Firebase:**
+    *   Buka **Firebase Console** > **Authentication** > **Settings** > **Authorized domains**.
+    *   Klik **"Add domain"** dan masukkan domain yang diberikan oleh Vercel/Firebase App Hosting (misalnya, `ropstory.vercel.app`).
+
+---
+
+## Metode 2: Deployment Manual ke Hosting Node.js (cPanel/Hostinger)
+
+Gunakan metode ini jika Anda tidak bisa menggunakan platform otomatis. Metode utamanya adalah melakukan semua proses "berat" di komputer lokal, lalu hanya mengunggah hasilnya ke server.
 
 ### Langkah 1: Persiapan di Komputer Lokal
 
-1.  **Buka Terminal:** Buka terminal atau command prompt di direktori utama proyek aplikasi Anda.
-
-2.  **Hapus Folder Lama (Opsional tapi Direkomendasikan):**
-    Untuk memastikan semuanya bersih, hapus folder `node_modules` dan `.next` jika sudah ada.
-    ```bash
-    rm -rf node_modules
-    rm -rf .next
-    ```
-
-3.  **Instal Semua Dependensi:**
-    Jalankan perintah ini untuk menginstal semua paket yang dibutuhkan oleh aplikasi.
-    ```bash
-    npm install
-    ```
-
-4.  **Bangun (Build) Aplikasi untuk Produksi:**
-    Perintah ini akan mengompilasi dan mengoptimalkan aplikasi Anda. Ini akan membuat folder `.next` yang siap untuk produksi.
-    ```bash
-    npm run build
-    ```
-
-Setelah langkah ini, folder proyek Anda sekarang berisi folder `node_modules` dan `.next` yang sudah siap.
-
----
+1.  **Buka Terminal:** Buka terminal di direktori utama proyek.
+2.  **Hapus Folder Lama (Opsional):** `rm -rf node_modules .next`
+3.  **Instal Dependensi:** `npm install`
+4.  **Bangun Aplikasi:** `npm run build`
 
 ### Langkah 2: Unggah File ke Server Hosting
 
-1.  **Gunakan File Manager atau FTP/SFTP:**
-    Unggah **semua file dan folder** dari proyek lokal Anda ke direktori aplikasi di server hosting Anda (misalnya, di dalam folder `kontrak` atau `ARSIP` di Hostinger).
-
-    Pastikan Anda mengunggah:
-    - Folder `.next`
-    - Folder `node_modules`
-    - Folder `public`
-    - File `package.json`
-    - File `next.config.ts`
-    - Dan semua file konfigurasi lainnya.
-
-    **Penting:** Dengan mengunggah folder `node_modules`, Anda tidak perlu lagi menjalankan `npm install` di server, yang sering menjadi sumber masalah.
-
----
+1.  Unggah **semua file dan folder** dari proyek lokal Anda ke direktori aplikasi di server hosting (`/kontrak` atau `/ARSIP`). Pastikan Anda mengunggah folder `.next` dan `node_modules`.
 
 ### Langkah 3: Konfigurasi di Panel Hosting (cPanel/hPanel)
 
-1.  **Buka "Setup Node.js App":**
-    Masuk ke panel kontrol hosting Anda dan navigasikan ke menu untuk mengatur aplikasi Node.js.
-
-2.  **Pastikan Konfigurasi Benar:**
-    - **Node.js version:** Pilih versi yang modern, seperti `18.x` atau `20.x`.
-    - **Application mode:** Pastikan diatur ke `production`.
-    - **Application root:** Arahkan ke direktori tempat Anda mengunggah file (misal, `/kontrak`).
-    - **Application startup file:** Pastikan ini adalah `app.js` atau `index.js` (cPanel sering membuatnya secara otomatis, biarkan saja).
-
-3.  **Hentikan Aplikasi (Penting):**
-    Klik tombol **"Stop App"**. Ini untuk memastikan tidak ada proses lama yang berjalan.
-
-4.  **Jalankan Aplikasi dengan Perintah yang Benar:**
-    Anda tidak perlu menjalankan `npm install`. Server hanya perlu menjalankan aplikasi yang sudah di-build. Perintah untuk ini adalah `npm run start`.
-
-    Di cPanel, Anda biasanya tidak mengetik perintah ini secara langsung. Panel kontrol akan menanganinya. Setelah mengunggah file dan mengatur konfigurasi, cukup klik tombol **"Start App"**.
-
-    Jika ada error `Can't acquire lock`, ulangi langkah **"Stop App"**, tunggu 30 detik, lalu klik **"Start App"** lagi.
-
----
+1.  Buka **"Setup Node.js App"**.
+2.  Pastikan konfigurasi benar:
+    *   **Node.js version:** `18.x` atau `20.x`.
+    *   **Application mode:** `production`.
+    *   **Application root:** Arahkan ke direktori Anda.
+    *   **Application startup file:** `server.js` atau `app.js` (biasanya dibuat otomatis).
+3.  **Hentikan Aplikasi:** Klik **"Stop App"**, tunggu 30 detik.
+4.  **Jalankan Aplikasi:** Klik **"Start App"**. Panel akan otomatis menjalankan `npm run start` untuk Anda.
 
 ### Langkah 4: Otorisasi Domain di Firebase
 
-Aplikasi ini masih perlu berbicara dengan Firebase untuk login dan database.
-
-1.  Buka **Firebase Console** Anda.
-2.  Pilih proyek Anda (`studio-7968430515-d32d0`).
-3.  Pergi ke **Authentication** > tab **Settings** > **Authorized domains**.
-4.  Klik **"Add domain"** dan masukkan nama domain Anda (misal: `www.domain-anda.com`).
-
-Tanpa langkah ini, login pengguna akan gagal.
+1.  Buka **Firebase Console** > **Authentication** > **Settings** > **Authorized domains**.
+2.  Klik **"Add domain"** dan masukkan nama domain hosting Anda (misal: `www.domain-anda.com`).

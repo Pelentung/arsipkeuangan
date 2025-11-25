@@ -24,6 +24,13 @@ export default function LaporanPage() {
         }
         return cellString;
     };
+    
+    const getFormattedDate = (date: Date) => {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
 
     const handleExport = () => {
         if (!user) {
@@ -102,7 +109,7 @@ export default function LaporanPage() {
         if (link.download !== undefined) {
             const url = URL.createObjectURL(blob);
             link.setAttribute('href', url);
-            link.setAttribute('download', `laporan_kontrak_${new Date().toISOString().split('T')[0]}.csv`);
+            link.setAttribute('download', `laporan_kontrak_${getFormattedDate(new Date())}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();

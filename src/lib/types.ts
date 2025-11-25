@@ -24,7 +24,7 @@ export interface Contract {
 export interface Bill {
   id: string;
   spmNumber: string;
-  spmDate: string; // Storing as ISO string
+  spmDate?: string; // Storing as ISO string
   sp2dNumber?: string;
   sp2dDate?: string; // Storing as ISO string
   description: string;

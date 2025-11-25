@@ -18,7 +18,7 @@ interface BillTableRowProps {
 
 export default function BillTableRow({ bill, contractId }: BillTableRowProps) {
     const { user } = useUser();
-    const spmDate = new Date(bill.spmDate);
+    const spmDate = bill.spmDate ? new Date(bill.spmDate) : null;
     const sp2dDate = bill.sp2dDate ? new Date(bill.sp2dDate) : null;
     const formatCurrency = (num: number) => {
         return new Intl.NumberFormat('id-ID', {
@@ -33,7 +33,7 @@ export default function BillTableRow({ bill, contractId }: BillTableRowProps) {
             <TableCell>
                 <div className="font-medium">{bill.spmNumber}</div>
                 <div className="text-xs text-muted-foreground">
-                    {format(spmDate, 'd MMM yyyy', { locale: id })}
+                    {spmDate ? format(spmDate, 'd MMM yyyy', { locale: id }) : '-'}
                 </div>
             </TableCell>
             <TableCell>

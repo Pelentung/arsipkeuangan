@@ -46,7 +46,6 @@ export function AddBillDialog({ contractId, className }: AddBillDialogProps) {
   const validateForm = (formData: FormData) => {
     const newErrors: Record<string, string> = {};
     if (!formData.get('spmNumber')) newErrors.spmNumber = 'Nomor SPM wajib diisi.';
-    if (!formData.get('spmDate')) newErrors.spmDate = 'Tanggal SPM wajib diisi.';
     if (!formData.get('description')) newErrors.description = 'Uraian wajib diisi.';
     if (Number(formData.get('amount')) <= 0) newErrors.amount = 'Jumlah harus lebih dari 0.';
     if (!status) newErrors.status = 'Status wajib dipilih.';
@@ -74,7 +73,7 @@ export function AddBillDialog({ contractId, className }: AddBillDialogProps) {
 
     const newBill: Omit<Bill, 'id'> = {
         spmNumber: formData.get('spmNumber') as string,
-        spmDate: formData.get('spmDate') as string,
+        spmDate: (formData.get('spmDate') as string) || undefined,
         sp2dNumber: (formData.get('sp2dNumber') as string) || undefined,
         sp2dDate: (formData.get('sp2dDate') as string) || undefined,
         description: formData.get('description') as string,
@@ -120,7 +119,7 @@ export function AddBillDialog({ contractId, className }: AddBillDialogProps) {
             {errors.spmNumber && <p className="text-sm font-medium text-destructive">{errors.spmNumber}</p>}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="spmDate">Tanggal SPM</Label>
+            <Label htmlFor="spmDate">Tanggal SPM (Opsional)</Label>
             <Input id="spmDate" name="spmDate" type="date" />
              {errors.spmDate && <p className="text-sm font-medium text-destructive">{errors.spmDate}</p>}
           </div>

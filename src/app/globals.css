@@ -83,3 +83,39 @@
     @apply bg-background text-foreground;
   }
 }
+
+@media print {
+    body {
+        background: #fff;
+        color: #000;
+    }
+    .print-hide {
+        display: none;
+    }
+    header, aside, footer {
+        display: none;
+    }
+    main {
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+    }
+    .rounded-lg.border {
+        border: none !important;
+        box-shadow: none !important;
+    }
+    table {
+        width: 100%;
+        page-break-inside: auto;
+    }
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+    thead {
+        display: table-header-group;
+    }
+    td, th {
+      font-size: 10px;
+    }
+}

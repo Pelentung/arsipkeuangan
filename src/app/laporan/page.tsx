@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ContractView } from '@/components/app/contract-view';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useContractContext } from '@/contexts/contract-context';
-import { Download } from 'lucide-react';
+import { Download, Printer } from 'lucide-react';
 import { useUser } from '@/firebase';
 
 export default function LaporanPage() {
@@ -30,6 +30,10 @@ export default function LaporanPage() {
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
         const day = date.getDate().toString().padStart(2, '0');
         return `${year}-${month}-${day}`;
+    }
+
+    const handlePrint = () => {
+        window.print();
     }
 
     const handleExport = () => {
@@ -123,18 +127,24 @@ export default function LaporanPage() {
     
     return (
         <>
-             <Card className="w-full mb-8">
+             <Card className="w-full mb-8 print-hide">
                 <CardHeader className='flex-row items-center justify-between'>
                     <div>
                         <CardTitle>Laporan Keuangan</CardTitle>
                         <CardDescription>
-                            Unduh semua data kontrak dan tagihan atau lihat langsung di bawah.
+                            Unduh atau cetak semua data kontrak dan tagihan.
                         </CardDescription>
                     </div>
-                     <Button onClick={handleExport}>
-                        <Download className="mr-2 h-4 w-4" />
-                        Ekspor ke CSV
-                    </Button>
+                    <div className='flex gap-2'>
+                        <Button onClick={handlePrint} variant="outline">
+                            <Printer className="mr-2 h-4 w-4" />
+                            Cetak Laporan
+                        </Button>
+                        <Button onClick={handleExport}>
+                            <Download className="mr-2 h-4 w-4" />
+                            Ekspor ke CSV
+                        </Button>
+                    </div>
                 </CardHeader>
             </Card>
 

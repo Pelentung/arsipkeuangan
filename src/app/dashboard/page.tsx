@@ -4,7 +4,6 @@ import { ContractView } from '@/components/app/contract-view';
 import { Suspense, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Coins, Receipt, Wallet, PlusCircle } from 'lucide-react';
-import { ContractStatusChart } from '@/components/app/contract-status-chart';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useContractContext } from '@/contexts/contract-context';
@@ -30,28 +29,6 @@ function Dashboard() {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
   };
   
-  const chartData = useMemo(() => {
-     if (loading || !contracts) return [];
-     const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
-     const monthlyData: { [key: string]: { realisasi: number } } = {};
-
-     contracts.forEach(contract => {
-        const contractDate = new Date(contract.contractDate);
-        if (isNaN(contractDate.getTime())) return;
-        const month = contractDate.getMonth();
-        const year = contractDate.getFullYear();
-        const key = `${monthNames[month]} ${year}`;
-
-        if (!monthlyData[key]) {
-            monthlyData[key] = { realisasi: 0 };
-        }
-        
-        monthlyData[key].realisasi += contract.realization;
-     });
-
-    return Object.entries(monthlyData).map(([month, data]) => ({ month, ...data }));
-  }, [contracts, loading]);
-
   if (isUserLoading || !user) {
     return null;
   }
@@ -112,15 +89,6 @@ function Dashboard() {
         </Card>
       </div>
       
-      <Card className='mb-8'>
-        <CardHeader>
-          <CardTitle>Realisasi Data Keuangan per Bulan</CardTitle>
-        </CardHeader>
-        <CardContent className="pl-2">
-            <ContractStatusChart data={chartData} />
-        </CardContent>
-      </Card>
-
       <ContractView />
     </>
   );

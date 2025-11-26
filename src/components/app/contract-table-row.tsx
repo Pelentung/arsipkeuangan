@@ -83,7 +83,7 @@ export default function ContractTableRow({
         </TableCell>
         <TableCell onClick={onToggle} className="cursor-pointer align-top">{contract.implementer}</TableCell>
         <TableCell onClick={onToggle} className="cursor-pointer align-top">
-          <p className="max-w-xs truncate">{contract.description}</p>
+          <p>{contract.description}</p>
         </TableCell>
         <TableCell onClick={onToggle} className="text-right cursor-pointer align-top">
           {formatCurrency(contract.value)}

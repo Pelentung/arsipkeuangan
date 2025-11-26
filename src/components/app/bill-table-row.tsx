@@ -44,7 +44,7 @@ export default function BillTableRow({ bill, contractId, readOnly = false }: Bil
                 </div>
             </TableCell>
             <TableCell>
-                <p className="max-w-xs truncate">{bill.description}</p>
+                <p>{bill.description}</p>
             </TableCell>
             <TableCell>{bill.status}</TableCell>
             <TableCell className="text-right font-medium">

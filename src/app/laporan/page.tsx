@@ -148,7 +148,7 @@ export default function LaporanPage() {
                 </CardHeader>
             </Card>
 
-            <ContractView />
+            <ContractView readOnly={true} />
         </>
     );
 }

@@ -34,6 +34,7 @@ interface ContractTableRowProps {
   isOpen: boolean;
   onToggle: () => void;
   isEven: boolean;
+  readOnly?: boolean;
 }
 
 export default function ContractTableRow({
@@ -41,6 +42,7 @@ export default function ContractTableRow({
   isOpen,
   onToggle,
   isEven,
+  readOnly = false,
 }: ContractTableRowProps) {
   const { user } = useUser();
   const contractDate = new Date(contract.contractDate);
@@ -54,6 +56,8 @@ export default function ContractTableRow({
   };
 
   const status = contract.remainingValue <= 0 ? 'Selesai' : 'Belum Selesai';
+
+  const colSpan = readOnly ? 7 : 8;
 
   return (
     <>
@@ -100,40 +104,42 @@ export default function ContractTableRow({
             {status}
           </Badge>
         </TableCell>
-        <TableCell className="text-center align-top">
-          <div className="flex items-center justify-center gap-1">
-            <Button variant="ghost" size="icon" className="h-8 w-8 p-0" onClick={onToggle}>
-                {isOpen ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
-                <span className="sr-only">Lihat Tagihan</span>
-              </Button>
-            <AddBillDialog contractId={contract.id} />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">Buka menu</span>
-                  <MoreHorizontal className="h-4 w-4" />
+        {!readOnly && (
+          <TableCell className="text-center align-top">
+            <div className="flex items-center justify-center gap-1">
+              <Button variant="ghost" size="icon" className="h-8 w-8 p-0" onClick={onToggle}>
+                  {isOpen ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                  <span className="sr-only">Lihat Tagihan</span>
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Aksi Kontrak</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href={`/ubah-kontrak/${contract.id}`}>
-                    Ubah Kontrak
-                  </Link>
-                </DropdownMenuItem>
-                <DeleteContractDialog contractId={contract.id} />
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </TableCell>
+              <AddBillDialog contractId={contract.id} />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-8 w-8 p-0">
+                    <span className="sr-only">Buka menu</span>
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Aksi Kontrak</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href={`/ubah-kontrak/${contract.id}`}>
+                      Ubah Kontrak
+                    </Link>
+                  </DropdownMenuItem>
+                  <DeleteContractDialog contractId={contract.id} />
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </TableCell>
+        )}
       </TableRow>
       <TableRow className={cn(!isOpen && 'hidden')}>
-          <TableCell colSpan={8} className="p-0">
+          <TableCell colSpan={colSpan} className="p-0">
             <div className="p-4 bg-muted">
               <h4 className="font-semibold mb-2">Detail Tagihan</h4>
               {contract.bills && contract.bills.length > 0 ? (
@@ -146,9 +152,11 @@ export default function ContractTableRow({
                         <TableHead>Uraian</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right">Jumlah</TableHead>
-                        <TableHead className="text-center w-[120px]">
-                          Aksi
-                        </TableHead>
+                        {!readOnly && (
+                          <TableHead className="text-center w-[120px]">
+                            Aksi
+                          </TableHead>
+                        )}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -157,6 +165,7 @@ export default function ContractTableRow({
                           key={bill.id}
                           bill={bill}
                           contractId={contract.id}
+                          readOnly={readOnly}
                         />
                       ))}
                     </TableBody>

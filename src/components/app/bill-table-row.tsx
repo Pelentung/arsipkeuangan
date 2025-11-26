@@ -14,9 +14,10 @@ import { useUser } from '@/firebase';
 interface BillTableRowProps {
     bill: Bill;
     contractId: string;
+    readOnly?: boolean;
 }
 
-export default function BillTableRow({ bill, contractId }: BillTableRowProps) {
+export default function BillTableRow({ bill, contractId, readOnly = false }: BillTableRowProps) {
     const { user } = useUser();
     const spmDate = bill.spmDate ? new Date(bill.spmDate) : null;
     const sp2dDate = bill.sp2dDate ? new Date(bill.sp2dDate) : null;
@@ -49,25 +50,27 @@ export default function BillTableRow({ bill, contractId }: BillTableRowProps) {
             <TableCell className="text-right font-medium">
                 {formatCurrency(bill.amount)}
             </TableCell>
-            <TableCell className="text-center">
-                <div className="flex items-center justify-center gap-1">
-                    <EditBillDialog contractId={contractId} bill={bill} />
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Buka menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Aksi Tagihan</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <EditBillDialog contractId={contractId} bill={bill} isMenuItem />
-                            <DeleteBillDialog contractId={contractId} billId={bill.id} />
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-            </TableCell>
+            {!readOnly && (
+                <TableCell className="text-center">
+                    <div className="flex items-center justify-center gap-1">
+                        <EditBillDialog contractId={contractId} bill={bill} />
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Buka menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Aksi Tagihan</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <EditBillDialog contractId={contractId} bill={bill} isMenuItem />
+                                <DeleteBillDialog contractId={contractId} billId={bill.id} />
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </TableCell>
+            )}
         </TableRow>
     );
 }

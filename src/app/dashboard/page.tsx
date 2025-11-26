@@ -89,7 +89,7 @@ function Dashboard() {
         </Card>
       </div>
       
-      <ContractView />
+      <ContractView readOnly={false} />
     </>
   );
 }

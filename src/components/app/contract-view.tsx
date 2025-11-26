@@ -16,7 +16,11 @@ import {
 } from '@/components/ui/table';
 import ContractTableRow from './contract-table-row';
 
-export function ContractView() {
+interface ContractViewProps {
+  readOnly?: boolean;
+}
+
+export function ContractView({ readOnly = false }: ContractViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const { contracts, loading } = useContractContext();
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({});
@@ -76,7 +80,9 @@ export function ContractView() {
                 <TableHead className="text-right">Realisasi</TableHead>
                 <TableHead className="text-right">Sisa</TableHead>
                 <TableHead className="text-center">Status</TableHead>
-                <TableHead className="text-center w-[150px]">Aksi</TableHead>
+                {!readOnly && (
+                  <TableHead className="text-center w-[150px]">Aksi</TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -87,6 +93,7 @@ export function ContractView() {
                     isOpen={openStates[contract.id] || false}
                     onToggle={() => toggleRow(contract.id)}
                     isEven={index % 2 === 0}
+                    readOnly={readOnly}
                 />
               ))}
             </TableBody>
@@ -101,11 +108,13 @@ export function ContractView() {
             {searchTerm
               ? 'Coba kata kunci pencarian lain atau '
               : 'Mulai dengan '}
-            <Link href="/tambah-kontrak">
-              <span className="text-primary hover:underline cursor-pointer">
-                menambahkan data baru
-              </span>
-            </Link>
+            {!readOnly && (
+              <Link href="/tambah-kontrak">
+                <span className="text-primary hover:underline cursor-pointer">
+                  menambahkan data baru
+                </span>
+              </Link>
+            )}
             .
           </p>
         </div>

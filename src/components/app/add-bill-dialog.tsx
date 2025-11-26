@@ -71,11 +71,14 @@ export function AddBillDialog({ contractId, className }: AddBillDialogProps) {
       return;
     }
 
+    const spmDateValue = formData.get('spmDate') as string;
+    const sp2dDateValue = formData.get('sp2dDate') as string;
+
     const newBill: Omit<Bill, 'id'> = {
         spmNumber: formData.get('spmNumber') as string,
-        spmDate: (formData.get('spmDate') as string) || undefined,
+        spmDate: spmDateValue || undefined,
         sp2dNumber: (formData.get('sp2dNumber') as string) || undefined,
-        sp2dDate: (formData.get('sp2dDate') as string) || undefined,
+        sp2dDate: sp2dDateValue || undefined,
         description: formData.get('description') as string,
         amount: Number(formData.get('amount')),
         status: status as Bill['status'],

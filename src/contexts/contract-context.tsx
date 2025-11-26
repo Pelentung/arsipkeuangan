@@ -76,7 +76,8 @@ export function useContractContextData(): ContractContextType {
 
   const contractsCollectionRef = useMemo(() => {
     if (!firestore || !user) return null;
-    return collection(firestore, 'users', user.uid, 'contracts');
+    const hardcodedUserId = '6AXUlUuJU1gELbS43XnZtj5TcK72';
+    return collection(firestore, 'users', hardcodedUserId, 'contracts');
   }, [firestore, user]);
 
   const { data: contractsData, isLoading: contractsLoading } = useCollection(contractsCollectionRef, {

@@ -130,7 +130,7 @@ export default function LaporanPage() {
              <Card className="w-full mb-8 print-hide">
                 <CardHeader className='flex-row items-center justify-between'>
                     <div>
-                        <CardTitle>Laporan Keuangan</CardTitle>
+                        <CardTitle>Laporan Data Kontrak</CardTitle>
                         <CardDescription>
                             Unduh atau cetak semua data kontrak dan tagihan.
                         </CardDescription>

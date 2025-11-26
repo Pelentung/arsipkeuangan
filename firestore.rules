@@ -7,9 +7,20 @@ service cloud.firestore {
     function isOwner(userId) {
       return request.auth != null && request.auth.uid == userId;
     }
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
 
-    match /users/{userId}/{document=**} {
-      allow read, write: if isOwner(userId);
+    // Aturan lama untuk akses data pribadi, bisa dihapus atau disimpan jika diperlukan lagi
+    // match /users/{userId}/{document=**} {
+    //   allow read, write: if isOwner(userId);
+    // }
+
+    // Aturan baru: Izinkan semua pengguna yang sudah login untuk membaca dan menulis
+    // ke koleksi kontrak milik UID yang sudah ditentukan.
+    match /users/6AXUlUuJU1gELbS43XnZtj5TcK72/{document=**} {
+      allow read, write: if isAuthenticated();
     }
   }
 }

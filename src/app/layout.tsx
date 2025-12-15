@@ -31,6 +31,9 @@ export default function RootLayout({
 </script>
       </head>
       <body className="font-body antialiased">
+        <amp-auto-ads type="adsense"
+            data-ad-client="ca-pub-8805948047019009">
+        </amp-auto-ads>
         <FirebaseClientProvider>
           <ConditionalLayout>
             {children}

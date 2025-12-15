@@ -24,6 +24,8 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
           rel="stylesheet"
         />
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8805948047019009"
+     crossOrigin="anonymous"></script>
       </head>
       <body className="font-body antialiased">
         <FirebaseClientProvider>

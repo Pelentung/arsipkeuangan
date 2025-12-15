@@ -19,6 +19,11 @@ function MainContent({ children }: { children: ReactNode }) {
                         {children}
                     </main>
                 </div>
+                <div className="p-4 border-t">
+                    <amp-auto-ads type="adsense"
+                        data-ad-client="ca-pub-8805948047019009">
+                    </amp-auto-ads>
+                </div>
                 <footer className="p-4 text-center border-t">
                     <p className="text-sm text-muted-foreground">Design Aplication By : PELENTUNG</p>
                 </footer>
